@@ -70,13 +70,8 @@
                     </div>
                 </div>
 
-                <!-- Desni gumbi: Admin & Košarica -->
+                <!-- Desni gumb: Košarica -->
                 <div class="flex items-center space-x-3">
-                    <button onclick="toggleAdminModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-1.5 border border-slate-200">
-                        <i class="fa-solid fa-gear text-aqua-600"></i>
-                        <span class="hidden sm:inline">⚙ Admin</span>
-                    </button>
-
                     <button onclick="toggleCartModal()" class="relative bg-aqua-600 hover:bg-aqua-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-md shadow-teal-500/20 transition flex items-center space-x-2">
                         <i class="fa-solid fa-cart-shopping"></i>
                         <span>Košarica</span>
@@ -95,7 +90,6 @@
             <h1 class="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">Zdrave ribice, kozice in bujne rastline za vaš akvarij</h1>
             <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-6">Preglejte ponudbo domače vzreje, izberite priljubljene akvarijske prebivalce in oddajte neobvezujoče povpraševanje ali naročilo.</p>
             
-            <!-- Hitre prednosti -->
             <div class="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-teal-100 font-medium">
                 <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Zdrave domače živali</div>
                 <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Osebni prevzem & nasveti</div>
@@ -106,17 +100,8 @@
 
     <!-- Glavna vsebina: Kategorije in Katalog -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
-        
-        <!-- Kategorije Filter -->
-        <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters">
-            <!-- Dinamično generirani gumbi kategorij -->
-        </div>
-
-        <!-- Mreža Izdelkov -->
-        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Dinamični izdelki se naložijo s pomočjo JS -->
-        </div>
-
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters"></div>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
     </main>
 
     <!-- Noga strani -->
@@ -151,26 +136,20 @@
         </div>
     </footer>
 
-    <!-- MODAL NOVO: PODROBNOSTI IZDELKA (KLIK NA SLIKO/OPIS) -->
+    <!-- MODAL: PODROBNOSTI IZDELKA -->
     <div id="product-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeProductModalOnOutside(event)">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative animate-fadeIn" onclick="event.stopPropagation()">
-            <!-- Gumb za zaprtje -->
             <button onclick="closeProductModal()" class="absolute top-3 right-3 bg-slate-900/50 hover:bg-slate-900 text-white rounded-full w-8 h-8 flex items-center justify-center z-20 font-bold transition">&times;</button>
-            
-            <!-- Velika slika -->
             <div class="w-full md:w-1/2 h-64 md:h-auto bg-slate-100 relative">
                 <img id="detail-img" src="" alt="" class="w-full h-full object-cover">
                 <div id="detail-stock-badge" class="absolute top-3 left-3 z-10"></div>
             </div>
-
-            <!-- Vsebina opisa -->
             <div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
                 <div>
                     <span id="detail-category" class="text-xs font-bold text-teal-600 uppercase tracking-wider block mb-1"></span>
                     <h2 id="detail-title" class="text-2xl font-bold text-slate-800 mb-2"></h2>
                     <p id="detail-desc" class="text-slate-600 text-sm leading-relaxed mb-6 custom-scroll max-h-40 overflow-y-auto"></p>
                 </div>
-
                 <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
                     <div>
                         <span class="text-xs text-slate-400 block">Cena / kos</span>
@@ -185,11 +164,9 @@
         </div>
     </div>
 
-    <!-- MODAL 1: KOŠARICA IN NAROČILO -->
+    <!-- MODAL: KOŠARICA IN NAROČILO -->
     <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end transition-opacity">
         <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
-            
-            <!-- Glava košarice -->
             <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-bag-shopping text-aqua-500 text-xl"></i>
@@ -197,20 +174,12 @@
                 </div>
                 <button onclick="toggleCartModal()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
             </div>
-
-            <!-- Vsebina košarice -->
-            <div class="p-5 flex-grow overflow-y-auto custom-scroll space-y-4" id="cart-items-container">
-                <!-- Dinamično naloženi artikli -->
-            </div>
-
-            <!-- Obrazec in izračun na dnu -->
+            <div class="p-5 flex-grow overflow-y-auto custom-scroll space-y-4" id="cart-items-container"></div>
             <div class="p-5 bg-slate-50 border-t border-slate-200 space-y-4">
                 <div class="flex justify-between items-center text-lg font-bold text-slate-800">
                     <span>Skupaj za plačilo:</span>
                     <span id="cart-total-price" class="text-teal-700 text-xl">0.00 €</span>
                 </div>
-
-                <!-- Obrazec za kontakt/naročilo -->
                 <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 pt-2 border-t border-slate-200 text-xs">
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Ime in Priimek *</label>
@@ -234,8 +203,6 @@
                         </select>
                         <textarea id="cust-notes" rows="2" placeholder="Morebitna vprašanja ali željen čas prevzema..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
                     </div>
-
-                    <!-- Gumbi za oddajo -->
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button type="submit" name="action" value="whatsapp" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 shadow transition">
                             <i class="fa-brands fa-whatsapp text-lg"></i>
@@ -248,203 +215,38 @@
                     </div>
                 </form>
             </div>
-
-        </div>
-    </div>
-
-    <!-- MODAL 2: ADMIN PLOŠČA (⚙ ADMIN) -->
-    <div id="admin-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-            
-            <!-- Glava Admin plošče -->
-            <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-sliders text-teal-400 text-xl"></i>
-                    <h3 class="font-bold text-lg">⚙ Admin Plošča (Upravljanje trgovine)</h3>
-                </div>
-                <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-2">&times;</button>
-            </div>
-
-            <!-- Tabi v Adminu -->
-            <div class="bg-slate-100 border-b border-slate-200 px-4 flex space-x-2 text-sm font-semibold pt-2">
-                <button id="tab-products-btn" onclick="switchAdminTab('products')" class="px-4 py-2 border-b-2 border-teal-600 text-teal-700">Seznam Izdelkov & Cene</button>
-                <button id="tab-add-btn" onclick="switchAdminTab('add')" class="px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800">+ Dodaj Nov Izdelek</button>
-                <button id="tab-settings-btn" onclick="switchAdminTab('settings')" class="px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800">Nastavitve Kontakta</button>
-            </div>
-
-            <!-- Vsebina Admin Plošče -->
-            <div class="p-6 overflow-y-auto custom-scroll flex-grow">
-                
-                <!-- TAB 1: Urejanje obstoječih izdelkov -->
-                <div id="admin-tab-products" class="space-y-4">
-                    <p class="text-xs text-slate-500">Tukaj lahko neposredno spreminjate cene, opise ali označite zalogo. Spremembe se takoj shranijo v spletno stran.</p>
-                    <div id="admin-products-list" class="space-y-3">
-                        <!-- Generirano z JS -->
-                    </div>
-                </div>
-
-                <!-- TAB 2: Dodajanje novega izdelka -->
-                <div id="admin-tab-add" class="hidden space-y-4 max-w-lg mx-auto">
-                    <h4 class="font-bold text-slate-800 border-b pb-2">Dodaj nov izdelek v trgovino</h4>
-                    <form onsubmit="addNewProduct(event)" class="space-y-3 text-sm">
-                        <div>
-                            <label class="block font-medium mb-1">Naziv izdelka *</label>
-                            <input type="text" id="new-prod-name" required placeholder="npr. Red Cherry Kozice" class="w-full p-2.5 border rounded-lg">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-medium mb-1">Kategorija *</label>
-                                <select id="new-prod-cat" class="w-full p-2.5 border rounded-lg">
-                                    <option value="ribice">Ribice</option>
-                                    <option value="kozice">Kozice</option>
-                                    <option value="rastline">Rastline</option>
-                                    <option value="oprema">Oprema & Hrana</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block font-medium mb-1">Cena (€) *</label>
-                                <input type="number" step="0.1" id="new-prod-price" required placeholder="2.50" class="w-full p-2.5 border rounded-lg">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block font-medium mb-1">URL Slike ali predloga</label>
-                            <input type="text" id="new-prod-img" placeholder="https://..." class="w-full p-2.5 border rounded-lg">
-                            <span class="text-xs text-slate-400">Če pustite prazno, se ustvari avtomatska ikona.</span>
-                        </div>
-                        <div>
-                            <label class="block font-medium mb-1">Opis</label>
-                            <textarea id="new-prod-desc" rows="2" placeholder="Kratek opis, nega, velikost..." class="w-full p-2.5 border rounded-lg"></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg transition">Dodaj izdelek</button>
-                    </form>
-                </div>
-
-                <!-- TAB 3: Nastavitve kontakta -->
-                <div id="admin-tab-settings" class="hidden space-y-4 max-w-lg mx-auto text-sm">
-                    <h4 class="font-bold text-slate-800 border-b pb-2">Uredi kontaktne podatke in obvestilo</h4>
-                    <form onsubmit="saveSiteSettings(event)" class="space-y-3">
-                        <div>
-                            <label class="block font-medium mb-1">Obvestilo na vrhu (Banner)</label>
-                            <input type="text" id="set-announcement" class="w-full p-2.5 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block font-medium mb-1">Telefonska številka</label>
-                            <input type="text" id="set-phone" class="w-full p-2.5 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block font-medium mb-1">E-poštni naslov</label>
-                            <input type="email" id="set-email" class="w-full p-2.5 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block font-medium mb-1">Lokacija / Mesto</label>
-                            <input type="text" id="set-location" class="w-full p-2.5 border rounded-lg">
-                        </div>
-                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition">Shrani nastavitve</button>
-                    </form>
-                </div>
-
-            </div>
-
-            <!-- Noga Admina -->
-            <div class="p-4 bg-slate-50 border-t flex justify-between items-center text-xs">
-                <button onclick="resetToDefaults()" class="text-red-600 hover:underline">Ponastavi na začetne podatke</button>
-                <button onclick="toggleAdminModal()" class="bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold">Zapri Admin</button>
-            </div>
-
         </div>
     </div>
 
     <script>
-        // --- 1. ZAČETNI PODATKI (DEFAULT DATA) ---
-        const initialProducts = [
-            {
-                id: 1,
-                name: "CPD - Celestial Pearl Danio",
-                category: "ribice",
-                price: 3.50,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&q=80",
-                desc: "Preudarno vzrejene mikro ribice s prelepimi pikami in rdečimi plavutmi. Zelo mirne, primerne za nano akvarije. Zrastejo do cca 2 cm."
-            },
-            {
-                id: 2,
-                name: "Sterba Corydoras (Sterbiji)",
-                category: "ribice",
-                price: 4.20,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500&q=80",
-                desc: "Priljubljeni talni čistilci z rumenimi prsnimi plavutmi. Odlični za družinske akvarije. Najraje plavajo v skupinicah po 5 ali več."
-            },
-            {
-                id: 3,
-                name: "Ancistrus (Navadni sesalec)",
-                category: "ribice",
-                price: 2.50,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80",
-                desc: "Neustavljiv čistilec alg z dna in stekla akvarija. Nezahteven za vzdrževanje, popoln za vse vrste akvarijev."
-            },
-            {
-                id: 4,
-                name: "Red Cherry Kozice",
-                category: "kozice",
-                price: 1.50,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1563281577-a7be47e20db9?w=500&q=80",
-                desc: "Intenzivno rdeče kozice Neocaridina. Popolne za začetnike in nano akvarije. Zelo pridno čistijo ostanke hrane in mikro alge."
-            },
-            {
-                id: 5,
-                name: "Blue Dream Kozice",
-                category: "kozice",
-                price: 2.20,
-                inStock: false,
-                image: "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=500&q=80",
-                desc: "Nasičeno temno modre barve. Čudovit kontrast na zelenih rastlinah in temni podlagi."
-            },
-            {
-                id: 6,
-                name: "Anubias Nana na korenini",
-                category: "rastline",
-                price: 6.50,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=500&q=80",
-                desc: "Trpežna akvarijska rastlina z močnimi listi. Ne potrebuje dodatnega CO2 ali močne svetlobe. Že pritrjena na naravno koreninico."
-            },
-            {
-                id: 7,
-                name: "Java Moss (Javanski mah)",
-                category: "rastline",
-                price: 3.00,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=500&q=80",
-                desc: "Odličen mah za patruljiranje in skrivanje mladih kozic ter ribic. Hitro raste in nudi naravni videz akvarija."
-            },
-            {
-                id: 8,
-                name: "Hrana v granulah za talne ribe",
-                category: "oprema",
-                price: 5.00,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500&q=80",
-                desc: "Visokokakovostna potapljajoča se hrana s spirulino za Corydorase in Ancistruse. Spodbuja zdrav razvoj in lepše barve."
-            }
-        ];
-
-        const defaultSettings = {
+        // =========================================================================
+        // ⚙️ TVOJA PRIVATNA NADZORNA PLOŠČA (Spreminjaj tukaj na GitHubu)
+        // =========================================================================
+        
+        const settings = {
             announcement: "🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.",
             phone: "+386 40 123 456",
             email: "info@akvasvet.si",
             location: "Ljubljana z okolico"
         };
 
-        // --- 2. STANJE APLIKACIJE (STATE) ---
-        let products = JSON.parse(localStorage.getItem('akva_products')) || initialProducts;
-        let settings = JSON.parse(localStorage.getItem('akva_settings')) || defaultSettings;
+        const products = [
+            { id: 1, name: "CPD - Celestial Pearl Danio", category: "ribice", price: 3.50, inStock: true, image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&q=80", desc: "Preudarno vzrejene mikro ribice s prelepimi pikami in rdečimi plavutmi. Zelo mirne." },
+            { id: 2, name: "Sterba Corydoras (Sterbiji)", category: "ribice", price: 4.20, inStock: true, image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500&q=80", desc: "Priljubljeni talni čistilci z rumenimi prsnimi plavutmi." },
+            { id: 3, name: "Ancistrus (Navadni sesalec)", category: "ribice", price: 2.50, inStock: true, image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80", desc: "Neustavljiv čistilec alg z dna in stekla akvarija." },
+            { id: 4, name: "Red Cherry Kozice", category: "kozice", price: 1.50, inStock: true, image: "https://images.unsplash.com/photo-1563281577-a7be47e20db9?w=500&q=80", desc: "Intenzivno rdeče kozice Neocaridina." },
+            { id: 5, name: "Blue Dream Kozice", category: "kozice", price: 2.20, inStock: false, image: "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=500&q=80", desc: "Nasičeno temno modre barve." },
+            { id: 6, name: "Anubias Nana na korenini", category: "rastline", price: 6.50, inStock: true, image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=500&q=80", desc: "Trpežna akvarijska rastlina z močnimi listi." },
+            { id: 7, name: "Java Moss (Javanski mah)", category: "rastline", price: 3.00, inStock: true, image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=500&q=80", desc: "Odličen mah za skrivanje mladih kozic." },
+            { id: 8, name: "Hrana v granulah za talne ribe", category: "oprema", price: 5.00, inStock: true, image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500&q=80", desc: "Visokokakovostna potapljajoča se hrana s spirulino." }
+        ];
+
+        // =========================================================================
+        // LOGIKA STRANI (Za uporabnike - ne spreminjaj spodaj)
+        // =========================================================================
         let cart = [];
         let activeCategory = 'vse';
 
-        // --- 3. INICIALIZACIJA ---
         window.onload = function() {
             applySettings();
             renderCategories();
@@ -459,15 +261,8 @@
             document.getElementById('footer-phone').innerText = settings.phone;
             document.getElementById('footer-email').innerText = settings.email;
             document.getElementById('footer-location').innerText = settings.location;
-            
-            // Popolni polja v nastavitvah Admina
-            document.getElementById('set-announcement').value = settings.announcement;
-            document.getElementById('set-phone').value = settings.phone;
-            document.getElementById('set-email').value = settings.email;
-            document.getElementById('set-location').value = settings.location;
         }
 
-        // --- 4. PRIKAZ IZDELKOV IN KATEGORIJ ---
         const categories = [
             { id: 'vse', name: 'Vsi izdelki', icon: 'fa-border-all' },
             { id: 'ribice', name: 'Akvarijske ribice', icon: 'fa-fish' },
@@ -503,31 +298,24 @@
 
             container.innerHTML = filtered.map(p => `
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col overflow-hidden relative group">
-                    
-                    <!-- Značka zaloge -->
                     <div class="absolute top-3 right-3 z-10">
                         ${p.inStock 
                             ? `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`
                             : `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`
                         }
                     </div>
-
-                    <!-- Slika (Klik odpre podrobnosti) -->
                     <div onclick="openProductModal(${p.id})" class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer">
                         <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
                         <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                             <span class="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Več informacij</span>
                         </div>
                     </div>
-
-                    <!-- Vsebina -->
                     <div class="p-5 flex flex-col flex-grow justify-between">
                         <div>
                             <span class="text-[11px] font-bold text-teal-600 uppercase tracking-wider">${p.category}</span>
                             <h3 onclick="openProductModal(${p.id})" class="font-bold text-slate-800 text-base mt-0.5 mb-1 leading-snug cursor-pointer hover:text-teal-600 transition">${p.name}</h3>
                             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4">${p.desc || 'Kakovostna ponudba domače vzreje.'}</p>
                         </div>
-
                         <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                             <div>
                                 <span class="text-xs text-slate-400 block">Cena / kos</span>
@@ -539,12 +327,10 @@
                             </button>
                         </div>
                     </div>
-
                 </div>
             `).join('');
         }
 
-        // --- NOVO: LOGIKA ZA OKNO PODROBNOSTI IZDELKA ---
         function openProductModal(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
@@ -588,7 +374,6 @@
             }
         }
 
-        // --- 5. LOGIKA KOŠARICE IN NAROČILA ---
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product || !product.inStock) return;
@@ -658,7 +443,6 @@
                                 <span class="text-slate-500 text-xs">${parseFloat(item.price).toFixed(2)} € / kos</span>
                             </div>
                         </div>
-
                         <div class="flex items-center space-x-2">
                             <div class="flex items-center border rounded-lg bg-white">
                                 <button onclick="updateQty(${item.id}, -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs">-</button>
@@ -674,7 +458,6 @@
             totalEl.innerText = `${total.toFixed(2)} €`;
         }
 
-        // Oddaja naročila / kontakt (Generiranje WhatsApp ali E-pošte)
         function submitOrder(e) {
             e.preventDefault();
             if (cart.length === 0) {
@@ -712,147 +495,6 @@
             cart = [];
             updateCartBadge();
             toggleCartModal();
-        }
-
-        // --- 6. LOGIKA ADMIN PLOŠČE (⚙ ADMIN) ---
-        function toggleAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                renderAdminProducts();
-            }
-        }
-
-        function switchAdminTab(tab) {
-            document.getElementById('admin-tab-products').classList.add('hidden');
-            document.getElementById('admin-tab-add').classList.add('hidden');
-            document.getElementById('admin-tab-settings').classList.add('hidden');
-
-            document.getElementById('tab-products-btn').className = "px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800";
-            document.getElementById('tab-add-btn').className = "px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800";
-            document.getElementById('tab-settings-btn').className = "px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800";
-
-            if (tab === 'products') {
-                document.getElementById('admin-tab-products').classList.remove('hidden');
-                document.getElementById('tab-products-btn').className = "px-4 py-2 border-b-2 border-teal-600 text-teal-700 font-bold";
-                renderAdminProducts();
-            } else if (tab === 'add') {
-                document.getElementById('admin-tab-add').classList.remove('hidden');
-                document.getElementById('tab-add-btn').className = "px-4 py-2 border-b-2 border-teal-600 text-teal-700 font-bold";
-            } else if (tab === 'settings') {
-                document.getElementById('admin-tab-settings').classList.remove('hidden');
-                document.getElementById('tab-settings-btn').className = "px-4 py-2 border-b-2 border-teal-600 text-teal-700 font-bold";
-            }
-        }
-
-        function renderAdminProducts() {
-            const container = document.getElementById('admin-products-list');
-            container.innerHTML = products.map(p => `
-                <div class="p-3 bg-slate-50 border rounded-xl flex flex-wrap md:flex-nowrap items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center space-x-3 w-full md:w-1/3">
-                        <img src="${p.image}" class="w-10 h-10 rounded object-cover" onerror="this.src='https://placehold.co/100x100/134e4a/ffffff?text=Akva'">
-                        <div>
-                            <input type="text" value="${p.name}" onchange="updateProductField(${p.id}, 'name', this.value)" class="font-bold border rounded p-1 w-full text-xs">
-                            <span class="text-slate-400 text-[10px] uppercase">${p.category}</span>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                        <label class="text-slate-500">Cena (€):</label>
-                        <input type="number" step="0.1" value="${p.price}" onchange="updateProductField(${p.id}, 'price', parseFloat(this.value))" class="border rounded p-1 w-20 text-center font-bold">
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                        <label class="flex items-center space-x-1 cursor-pointer">
-                            <input type="checkbox" ${p.inStock ? 'checked' : ''} onchange="updateProductField(${p.id}, 'inStock', this.checked)">
-                            <span class="${p.inStock ? 'text-emerald-700 font-bold' : 'text-rose-600'}">Na zalogi</span>
-                        </label>
-                    </div>
-
-                    <div>
-                        <button onclick="deleteProduct(${p.id})" class="text-rose-600 hover:text-rose-800 p-1.5"><i class="fa-solid fa-trash"></i> Brisi</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateProductField(id, field, value) {
-            const prod = products.find(p => p.id === id);
-            if (prod) {
-                prod[field] = value;
-                saveProducts();
-                renderProducts();
-            }
-        }
-
-        function deleteProduct(id) {
-            if (confirm("Ali ste prepričani, da želite izbrisati ta izdelek?")) {
-                products = products.filter(p => p.id !== id);
-                saveProducts();
-                renderProducts();
-                renderAdminProducts();
-            }
-        }
-
-        function addNewProduct(e) {
-            e.preventDefault();
-            const name = document.getElementById('new-prod-name').value;
-            const category = document.getElementById('new-prod-cat').value;
-            const price = parseFloat(document.getElementById('new-prod-price').value);
-            let image = document.getElementById('new-prod-img').value;
-            const desc = document.getElementById('new-prod-desc').value;
-
-            if (!image) {
-                image = "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&q=80";
-            }
-
-            const newProd = {
-                id: Date.now(),
-                name,
-                category,
-                price,
-                inStock: true,
-                image,
-                desc
-            };
-
-            products.push(newProd);
-            saveProducts();
-            renderProducts();
-            
-            // Počisti obrazec
-            e.target.reset();
-            alert("Nov izdelek je uspešno dodan!");
-            switchAdminTab('products');
-        }
-
-        function saveSiteSettings(e) {
-            e.preventDefault();
-            settings.announcement = document.getElementById('set-announcement').value;
-            settings.phone = document.getElementById('set-phone').value;
-            settings.email = document.getElementById('set-email').value;
-            settings.location = document.getElementById('set-location').value;
-
-            localStorage.setItem('akva_settings', JSON.stringify(settings));
-            applySettings();
-            alert("Nastavitve so uspešno shranjene!");
-        }
-
-        function saveProducts() {
-            localStorage.setItem('akva_products', JSON.stringify(products));
-        }
-
-        function resetToDefaults() {
-            if (confirm("Želite ponastaviti vse izdelke in nastavitve na začetne? Vaše vnesene spremembe bodo izbrisane.")) {
-                localStorage.removeItem('akva_products');
-                localStorage.removeItem('akva_settings');
-                products = [...initialProducts];
-                settings = { ...defaultSettings };
-                applySettings();
-                renderProducts();
-                renderAdminProducts();
-                alert("Podatki so bili ponastavljeni.");
-            }
         }
     </script>
 </body>
