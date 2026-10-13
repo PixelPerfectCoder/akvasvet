@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AkvaSvet - Akvarijske ribice, kozice in oprema</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        aqua: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans">
+
+    <!-- Obvestilna vrstica zgoraj -->
+    <div id="announcement-bar" class="bg-aqua-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium shadow-sm flex justify-between items-center px-6">
+        <span id="announcement-text" class="w-full text-center">🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.</span>
+    </div>
+
+    <!-- Glavna navigacija / Meni -->
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                
+                <!-- Logotip -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('vse')">
+                    <div class="bg-gradient-to-tr from-aqua-600 to-cyan-500 text-white p-3 rounded-2xl shadow-lg shadow-teal-500/30">
+                        <i class="fa-solid font-bold fa-fish-fins text-2xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-aqua-700 to-cyan-600 bg-clip-text text-transparent">AkvaSvet</span>
+                        <span class="block text-xs text-slate-400 font-medium tracking-wide">HOBI AKVARISTIKA</span>
+                    </div>
+                </div>
+
+                <!-- Kontaktni podatki na vrhu za hitro klicanje -->
+                <div class="hidden lg:flex items-center space-x-6 text-sm text-slate-600">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-phone text-aqua-600"></i>
+                        <span id="nav-phone" class="font-semibold">+386 40 123 456</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-location-dot text-aqua-600"></i>
+                        <span id="nav-location" class="font-medium">Ljubljana z okolico</span>
+                    </div>
+                </div>
+
+                <!-- Desni gumbi: Admin & Košarica -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleAdminModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-1.5 border border-slate-200">
+                        <i class="fa-solid fa-gear text-aqua-600"></i>
+                        <span class="hidden sm:inline">⚙ Admin</span>
+                    </button>
+
+                    <button onclick="toggleCartModal()" class="relative bg-aqua-600 hover:bg-aqua-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-md shadow-teal-500/20 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Košarica</span>
+                        <span id="cart-count-badge" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full ml-1">0</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Predstavitveni pas -->
+    <section class="bg-gradient-to-b from-teal-900 to-slate-900 text-white py-12 px-4 shadow-inner relative overflow-hidden">
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <span class="inline-block bg-teal-800/80 text-teal-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3 border border-teal-600/40">Kakovostna domača akvaristika</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">Zdrave ribice, kozice in bujne rastline za vaš akvarij</h1>
+            <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-6">Preglejte ponudbo domače vzreje, izberite priljubljene akvarijske prebivalce in oddajte neobvezujoče povpraševanje ali naročilo.</p>
+            
+            <!-- Hitre prednosti -->
+            <div class="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-teal-100 font-medium">
+                <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Zdrave domače živali</div>
+                <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Osebni prevzem & nasveti</div>
+                <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Ugodne hobi cene</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Glavna vsebina: Kategorije in Katalog -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+        
+        <!-- Kategorije Filter -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters">
+            <!-- Dinamično generirani gumbi kategorij -->
+        </div>
+
+        <!-- Mreža Izdelkov -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dinamični izdelki se naložijo s pomočjo JS -->
+        </div>
+
+    </main>
+
+    <!-- Noga strani -->
+    <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
+            <div>
+                <div class="flex items-center space-x-2 text-white font-bold text-xl mb-3">
+                    <i class="fa-solid fa-fish-fins text-aqua-500"></i>
+                    <span>AkvaSvet</span>
+                </div>
+                <p class="text-slate-400 text-xs leading-relaxed">
+                    Spletno mesto za ljubitelje akvaristike. Ponujamo kakovostne živali iz domače vzreje ter izbrane rastline in opremo.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-3">Kontakt & Informacije</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><i class="fa-solid fa-phone text-aqua-500 mr-2"></i> <span id="footer-phone">+386 40 123 456</span></li>
+                    <li><i class="fa-solid fa-envelope text-aqua-500 mr-2"></i> <span id="footer-email">info@akvasvet.si</span></li>
+                    <li><i class="fa-solid fa-location-dot text-aqua-500 mr-2"></i> <span id="footer-location">Ljubljana, Slovenija</span></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-3">Način prevzema</h4>
+                <p class="text-xs leading-relaxed text-slate-400">
+                    Osebni prevzem po predhodnem dogovoru na navedeni lokaciji. Za nekatere izdel
