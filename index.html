@@ -151,6 +151,40 @@
         </div>
     </footer>
 
+    <!-- MODAL NOVO: PODROBNOSTI IZDELKA (KLIK NA SLIKO/OPIS) -->
+    <div id="product-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeProductModalOnOutside(event)">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative animate-fadeIn" onclick="event.stopPropagation()">
+            <!-- Gumb za zaprtje -->
+            <button onclick="closeProductModal()" class="absolute top-3 right-3 bg-slate-900/50 hover:bg-slate-900 text-white rounded-full w-8 h-8 flex items-center justify-center z-20 font-bold transition">&times;</button>
+            
+            <!-- Velika slika -->
+            <div class="w-full md:w-1/2 h-64 md:h-auto bg-slate-100 relative">
+                <img id="detail-img" src="" alt="" class="w-full h-full object-cover">
+                <div id="detail-stock-badge" class="absolute top-3 left-3 z-10"></div>
+            </div>
+
+            <!-- Vsebina opisa -->
+            <div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
+                <div>
+                    <span id="detail-category" class="text-xs font-bold text-teal-600 uppercase tracking-wider block mb-1"></span>
+                    <h2 id="detail-title" class="text-2xl font-bold text-slate-800 mb-2"></h2>
+                    <p id="detail-desc" class="text-slate-600 text-sm leading-relaxed mb-6 custom-scroll max-h-40 overflow-y-auto"></p>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-400 block">Cena / kos</span>
+                        <span id="detail-price" class="text-2xl font-extrabold text-slate-900"></span>
+                    </div>
+                    <button id="detail-add-btn" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-2 shadow-md shadow-teal-500/20">
+                        <i class="fa-solid fa-cart-plus"></i>
+                        <span>Dodaj v košarico</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL 1: KOŠARICA IN NAROČILO -->
     <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end transition-opacity">
         <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
@@ -330,7 +364,7 @@
                 price: 3.50,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&q=80",
-                desc: "Preudarno vzrejene mikro ribice s prelepimi pikami in rdečimi plavutmi. Zelo mirne."
+                desc: "Preudarno vzrejene mikro ribice s prelepimi pikami in rdečimi plavutmi. Zelo mirne, primerne za nano akvarije. Zrastejo do cca 2 cm."
             },
             {
                 id: 2,
@@ -339,7 +373,7 @@
                 price: 4.20,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500&q=80",
-                desc: "Priljubljeni talni čistilci z rumenimi prsnimi plavutmi. Odlični za družinske akvarije."
+                desc: "Priljubljeni talni čistilci z rumenimi prsnimi plavutmi. Odlični za družinske akvarije. Najraje plavajo v skupinicah po 5 ali več."
             },
             {
                 id: 3,
@@ -348,7 +382,7 @@
                 price: 2.50,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80",
-                desc: "Neustavljiv čistilec alg z dna in stekla akvarija. Nezahteven za vzdrževanje."
+                desc: "Neustavljiv čistilec alg z dna in stekla akvarija. Nezahteven za vzdrževanje, popoln za vse vrste akvarijev."
             },
             {
                 id: 4,
@@ -357,7 +391,7 @@
                 price: 1.50,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1563281577-a7be47e20db9?w=500&q=80",
-                desc: "Intenzivno rdeče kozice Neocaridina. Popolne za začetnike in nano akvarije."
+                desc: "Intenzivno rdeče kozice Neocaridina. Popolne za začetnike in nano akvarije. Zelo pridno čistijo ostanke hrane in mikro alge."
             },
             {
                 id: 5,
@@ -366,7 +400,7 @@
                 price: 2.20,
                 inStock: false,
                 image: "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=500&q=80",
-                desc: "Nasičeno temno modre barve. Čudovit kontrast na zelenih rastlinah."
+                desc: "Nasičeno temno modre barve. Čudovit kontrast na zelenih rastlinah in temni podlagi."
             },
             {
                 id: 6,
@@ -375,7 +409,7 @@
                 price: 6.50,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=500&q=80",
-                desc: "Trpežna akvarijska rastlina z močnimi listi. Ne potrebuje dodatnega CO2."
+                desc: "Trpežna akvarijska rastlina z močnimi listi. Ne potrebuje dodatnega CO2 ali močne svetlobe. Že pritrjena na naravno koreninico."
             },
             {
                 id: 7,
@@ -384,7 +418,7 @@
                 price: 3.00,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=500&q=80",
-                desc: "Odličen mah za patruljiranje in skrivanje mladih kozic ter ribic."
+                desc: "Odličen mah za patruljiranje in skrivanje mladih kozic ter ribic. Hitro raste in nudi naravni videz akvarija."
             },
             {
                 id: 8,
@@ -393,7 +427,7 @@
                 price: 5.00,
                 inStock: true,
                 image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500&q=80",
-                desc: "Visokokakovostna potapljajoča se hrana s spirulino za Corydorase in Ancistruse."
+                desc: "Visokokakovostna potapljajoča se hrana s spirulino za Corydorase in Ancistruse. Spodbuja zdrav razvoj in lepše barve."
             }
         ];
 
@@ -474,20 +508,23 @@
                     <div class="absolute top-3 right-3 z-10">
                         ${p.inStock 
                             ? `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`
-                            : `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Rasprodano</span>`
+                            : `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`
                         }
                     </div>
 
-                    <!-- Slika -->
-                    <div class="h-48 bg-slate-100 overflow-hidden relative">
+                    <!-- Slika (Klik odpre podrobnosti) -->
+                    <div onclick="openProductModal(${p.id})" class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer">
                         <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
+                        <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Več informacij</span>
+                        </div>
                     </div>
 
                     <!-- Vsebina -->
                     <div class="p-5 flex flex-col flex-grow justify-between">
                         <div>
                             <span class="text-[11px] font-bold text-teal-600 uppercase tracking-wider">${p.category}</span>
-                            <h3 class="font-bold text-slate-800 text-base mt-0.5 mb-1 leading-snug">${p.name}</h3>
+                            <h3 onclick="openProductModal(${p.id})" class="font-bold text-slate-800 text-base mt-0.5 mb-1 leading-snug cursor-pointer hover:text-teal-600 transition">${p.name}</h3>
                             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4">${p.desc || 'Kakovostna ponudba domače vzreje.'}</p>
                         </div>
 
@@ -505,6 +542,50 @@
 
                 </div>
             `).join('');
+        }
+
+        // --- NOVO: LOGIKA ZA OKNO PODROBNOSTI IZDELKA ---
+        function openProductModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('detail-img').src = product.image;
+            document.getElementById('detail-title').innerText = product.name;
+            document.getElementById('detail-category').innerText = product.category;
+            document.getElementById('detail-desc').innerText = product.desc || 'Kakovostna ponudba domače vzreje.';
+            document.getElementById('detail-price').innerText = `${parseFloat(product.price).toFixed(2)} €`;
+
+            const badgeContainer = document.getElementById('detail-stock-badge');
+            if (product.inStock) {
+                badgeContainer.innerHTML = `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`;
+            } else {
+                badgeContainer.innerHTML = `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`;
+            }
+
+            const addBtn = document.getElementById('detail-add-btn');
+            if (product.inStock) {
+                addBtn.disabled = false;
+                addBtn.className = "bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-2 shadow-md shadow-teal-500/20";
+                addBtn.onclick = function() {
+                    addToCart(product.id);
+                    closeProductModal();
+                };
+            } else {
+                addBtn.disabled = true;
+                addBtn.className = "bg-slate-200 text-slate-400 cursor-not-allowed px-5 py-2.5 rounded-xl text-sm font-bold flex items-center space-x-2";
+            }
+
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function closeProductModalOnOutside(e) {
+            if (e.target.id === 'product-modal') {
+                closeProductModal();
+            }
         }
 
         // --- 5. LOGIKA KOŠARICE IN NAROČILA ---
