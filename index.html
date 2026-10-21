@@ -176,4 +176,346 @@
                     <i class="fa-solid fa-bag-shopping text-aqua-500 text-xl"></i>
                     <h3 class="font-bold text-lg">Vaša košarica / Povpraševanje</h3>
                 </div>
-                <button onclick="toggleCartModal()" class="text-slate-400 hover:text-white text-
+                <button onclick="toggleCartModal()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+            </div>
+            <div class="p-5 flex-grow overflow-y-auto custom-scroll space-y-4" id="cart-items-container"></div>
+            <div class="p-5 bg-slate-50 border-t border-slate-200 space-y-4">
+                <div class="flex justify-between items-center text-lg font-bold text-slate-800">
+                    <span>Skupaj za plačilo:</span>
+                    <span id="cart-total-price" class="text-teal-700 text-xl">0.00 €</span>
+                </div>
+                <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 pt-2 border-t border-slate-200 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Ime in Priimek *</label>
+                        <input type="text" id="cust-name" required placeholder="npr. Marko Novak" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Telefon *</label>
+                            <input type="tel" id="cust-phone" required placeholder="040 123 456" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">E-pošta</label>
+                            <input type="email" id="cust-email" placeholder="marko@email.com" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Način prevzema / Opombe</label>
+                        <select id="cust-delivery" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none mb-2">
+                            <option value="Osebni prevzem">Osebni prevzem (Po dogovoru)</option>
+                            <option value="Dostava po pošti">Dostava po pošti (Rastline/Oprema)</option>
+                        </select>
+                        <textarea id="cust-notes" rows="2" placeholder="Morebitna vprašanja ali željen čas prevzema..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button type="submit" name="action" value="whatsapp" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 shadow transition">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            <span>Naroči na WhatsApp</span>
+                        </button>
+                        <button type="submit" name="action" value="email" class="bg-teal-700 hover:bg-teal-800 text-white py-3 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 shadow transition">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Pošlji po E-pošti</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 🔑 SUPABASE POVEZAVA
+        // =========================================================================
+        const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
+        
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        const settings = {
+            announcement: "🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.",
+            phone: "+386 40 123 456",
+            email: "info@akvasvet.si",
+            location: "Ljubljana z okolico"
+        };
+
+        let products = [];
+        let cart = [];
+        let activeCategory = 'vse';
+
+        window.onload = function() {
+            applySettings();
+            renderCategories();
+            fetchProductsFromSupabase();
+            updateCartBadge();
+        };
+
+        // NALAGANJE IZ SUPABASE BAZE
+        async function fetchProductsFromSupabase() {
+            const container = document.getElementById('product-grid');
+            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Nalaganje ponudbe iz baze...</div>`;
+
+            if (!supabaseClient) {
+                console.warn("Supabase ključi niso nastavljeni!");
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-amber-600 font-medium">Napaka pri nalaganju Supabase knjižnice.</div>`;
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*');
+
+                if (error) throw error;
+                products = data || [];
+                renderProducts();
+            } catch (err) {
+                console.error("Napaka pri branju iz Supabase:", err);
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500 font-medium">Napaka pri povezavi z bazo. Preveri, ali obstaja tabela 'products'.</div>`;
+            }
+        }
+
+        function applySettings() {
+            document.getElementById('announcement-text').innerText = settings.announcement;
+            document.getElementById('nav-phone').innerText = settings.phone;
+            document.getElementById('nav-location').innerText = settings.location;
+            document.getElementById('footer-phone').innerText = settings.phone;
+            document.getElementById('footer-email').innerText = settings.email;
+            document.getElementById('footer-location').innerText = settings.location;
+        }
+
+        const categories = [
+            { id: 'vse', name: 'Vsi izdelki', icon: 'fa-border-all' },
+            { id: 'ribice', name: 'Akvarijske ribice', icon: 'fa-fish' },
+            { id: 'kozice', name: 'Kozice', icon: 'fa-bug' },
+            { id: 'rastline', name: 'Rastline', icon: 'fa-leaf' },
+            { id: 'oprema', name: 'Hrana & Oprema', icon: 'fa-box' }
+        ];
+
+        function renderCategories() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="filterCategory('${cat.id}')" class="px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border ${activeCategory === cat.id ? 'bg-teal-700 text-white border-teal-700 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'}">
+                    <i class="fa-solid ${cat.icon}"></i>
+                    <span>${cat.name}</span>
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(catId) {
+            activeCategory = catId;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('product-grid');
+            const filtered = activeCategory === 'vse' ? products : products.filter(p => p.category === activeCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Trenutno ni izdelkov v tej kategoriji.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col overflow-hidden relative group">
+                    <div class="absolute top-3 right-3 z-10">
+                        ${p.inStock 
+                            ? `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`
+                            : `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`
+                        }
+                    </div>
+                    <div onclick="openProductModal(${p.id})" class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer">
+                        <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
+                        <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Več informacij</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow justify-between">
+                        <div>
+                            <span class="text-[11px] font-bold text-teal-600 uppercase tracking-wider">${p.category || 'splošno'}</span>
+                            <h3 onclick="openProductModal(${p.id})" class="font-bold text-slate-800 text-base mt-0.5 mb-1 leading-snug cursor-pointer hover:text-teal-600 transition">${p.name}</h3>
+                            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4">${p.desc || p.description || 'Kakovostna ponudba domače vzreje.'}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <div>
+                                <span class="text-xs text-slate-400 block">Cena / kos</span>
+                                <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price || 0).toFixed(2)} €</span>
+                            </div>
+                            <button onclick="addToCart(${p.id})" ${!p.inStock ? 'disabled' : ''} class="${p.inStock ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20' : 'bg-slate-200 text-slate-400 cursor-not-allowed'} px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Dodaj</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openProductModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('detail-img').src = product.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet';
+            document.getElementById('detail-title').innerText = product.name;
+            document.getElementById('detail-category').innerText = product.category || 'Splošno';
+            document.getElementById('detail-desc').innerText = product.desc || product.description || 'Kakovostna ponudba domače vzreje.';
+            document.getElementById('detail-price').innerText = `${parseFloat(product.price || 0).toFixed(2)} €`;
+
+            const badgeContainer = document.getElementById('detail-stock-badge');
+            if (product.inStock) {
+                badgeContainer.innerHTML = `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`;
+            } else {
+                badgeContainer.innerHTML = `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`;
+            }
+
+            const addBtn = document.getElementById('detail-add-btn');
+            if (product.inStock) {
+                addBtn.disabled = false;
+                addBtn.className = "bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-2 shadow-md shadow-teal-500/20";
+                addBtn.onclick = function() {
+                    addToCart(product.id);
+                    closeProductModal();
+                };
+            } else {
+                addBtn.disabled = true;
+                addBtn.className = "bg-slate-200 text-slate-400 cursor-not-allowed px-5 py-2.5 rounded-xl text-sm font-bold flex items-center space-x-2";
+            }
+
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function closeProductModalOnOutside(e) {
+            if (e.target.id === 'product-modal') {
+                closeProductModal();
+            }
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product || !product.inStock) return;
+
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+
+            updateCartBadge();
+            renderCartModal();
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cart-count-badge').innerText = totalQty;
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartBadge();
+            renderCartModal();
+        }
+
+        function toggleCartModal() {
+            const modal = document.getElementById('cart-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                renderCartModal();
+            }
+        }
+
+        function renderCartModal() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total-price');
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-slate-400">
+                        <i class="fa-solid fa-basket-shopping text-4xl mb-3 text-slate-300"></i>
+                        <p class="font-medium">Vaša košarica je prazna.</p>
+                        <p class="text-xs">Izberite ribice ali izdelke iz ponudbe.</p>
+                    </div>
+                `;
+                totalEl.innerText = "0.00 €";
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map(item => {
+                const itemTotal = (item.price || 0) * item.qty;
+                total += itemTotal;
+                return `
+                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div class="flex items-center space-x-3">
+                            <img src="${item.image || 'https://placehold.co/100x100/134e4a/ffffff?text=Akva'}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/134e4a/ffffff?text=Akva'">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-xs">${item.name}</h4>
+                                <span class="text-slate-500 text-xs">${parseFloat(item.price || 0).toFixed(2)} € / kos</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="flex items-center border rounded-lg bg-white">
+                                <button onclick="updateQty(${item.id}, -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs">-</button>
+                                <span class="px-2 text-xs font-bold">${item.qty}</span>
+                                <button onclick="updateQty(${item.id}, 1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs">+</button>
+                            </div>
+                            <span class="font-bold text-xs text-slate-800 w-14 text-right">${itemTotal.toFixed(2)} €</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            totalEl.innerText = `${total.toFixed(2)} €`;
+        }
+
+        function submitOrder(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert("Vaša košarica je prazna!");
+                return;
+            }
+
+            const action = e.submitter ? e.submitter.value : 'email';
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const email = document.getElementById('cust-email').value;
+            const delivery = document.getElementById('cust-delivery').value;
+            const notes = document.getElementById('cust-notes').value;
+
+            let total = 0;
+            let itemListText = cart.map(i => {
+                const sub = (i.price || 0) * i.qty;
+                total += sub;
+                return `- ${i.name} (${i.qty}x) = ${sub.toFixed(2)} €`;
+            }).join('\n');
+
+            const message = `Pozdravljeni! Oddajam novo povpraševanje na AkvaSvet:\n\nNAROČENI ARTIKLI:\n${itemListText}\n\nSkupaj: ${total.toFixed(2)} €\n\nPODATKI STRANKE:\nIme: ${name}\nTelefon: ${phone}\nE-pošta: ${email || '/'}\nPrevzem: ${delivery}\nOpombe: ${notes || '/'}`;
+
+            if (action === 'whatsapp') {
+                const cleanPhone = settings.phone.replace(/[^0-9]/g, '');
+                const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+            } else {
+                const subject = encodeURIComponent(`Novo naročilo - AkvaSvet (${name})`);
+                const mailtoUrl = `mailto:${settings.email}?subject=${subject}&body=${encodeURIComponent(message)}`;
+                window.location.href = mailtoUrl;
+            }
+
+            alert("Hvala za vaše povpraševanje! Sporočilo je pripravljeno za pošiljanje.");
+            cart = [];
+            updateCartBadge();
+            toggleCartModal();
+        }
+    </script>
+</body>
+</html>
