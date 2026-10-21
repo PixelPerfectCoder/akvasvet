@@ -4,516 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AkvaSvet - Akvarijske ribice, kozice in oprema</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- ⚡ SUPABASE KNJIŽNICA -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        aqua: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            900: '#134e4a',
-                        }
+                        aqua: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 900: '#134e4a' }
                     }
                 }
             }
         }
     </script>
-    <style>
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 4px; }
-    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans">
-
-    <!-- Obvestilna vrstica zgoraj -->
-    <div id="announcement-bar" class="bg-aqua-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium shadow-sm flex justify-between items-center px-6">
-        <span id="announcement-text" class="w-full text-center">🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.</span>
+    <div class="bg-teal-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium">
+        🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.
     </div>
-
-    <!-- Glavna navigacija / Meni -->
     <header class="bg-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                
-                <!-- Logotip -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('vse')">
-                    <div class="bg-gradient-to-tr from-aqua-600 to-cyan-500 text-white p-3 rounded-2xl shadow-lg shadow-teal-500/30">
-                        <i class="fa-solid font-bold fa-fish-fins text-2xl"></i>
-                    </div>
-                    <div>
-                        <span class="text-2xl font-bold bg-gradient-to-r from-aqua-700 to-cyan-600 bg-clip-text text-transparent">AkvaSvet</span>
-                        <span class="block text-xs text-slate-400 font-medium tracking-wide">HOBI AKVARISTIKA</span>
-                    </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-20 items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('vse')">
+                <div class="bg-teal-600 text-white p-3 rounded-2xl shadow-lg"><i class="fa-solid fa-fish-fins text-2xl"></i></div>
+                <div>
+                    <span class="text-2xl font-bold text-teal-700">AkvaSvet</span>
+                    <span class="block text-xs text-slate-400 font-medium">HOBI AKVARISTIKA</span>
                 </div>
-
-                <!-- Kontaktni podatki na vrhu -->
-                <div class="hidden lg:flex items-center space-x-6 text-sm text-slate-600">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-phone text-aqua-600"></i>
-                        <span id="nav-phone" class="font-semibold">+386 40 123 456</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-location-dot text-aqua-600"></i>
-                        <span id="nav-location" class="font-medium">Ljubljana z okolico</span>
-                    </div>
-                </div>
-
-                <!-- Desni gumb: Košarica -->
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleCartModal()" class="relative bg-aqua-600 hover:bg-aqua-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-md shadow-teal-500/20 transition flex items-center space-x-2">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        <span>Košarica</span>
-                        <span id="cart-count-badge" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full ml-1">0</span>
-                    </button>
-                </div>
-
             </div>
+            <button onclick="toggleCartModal()" class="relative bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center space-x-2">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Košarica</span>
+                <span id="cart-count-badge" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full ml-1">0</span>
+            </button>
         </div>
     </header>
-
-    <!-- Hero Predstavitveni pas -->
-    <section class="bg-gradient-to-b from-teal-900 to-slate-900 text-white py-12 px-4 shadow-inner relative overflow-hidden">
-        <div class="max-w-5xl mx-auto text-center relative z-10">
-            <span class="inline-block bg-teal-800/80 text-teal-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3 border border-teal-600/40">Kakovostna domača akvaristika</span>
-            <h1 class="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">Zdrave ribice, kozice in bujne rastline za vaš akvarij</h1>
-            <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-6">Preglejte ponudbo domače vzreje, izberite priljubljene akvarijske prebivalce in oddajte neobvezujoče povpraševanje ali naročilo.</p>
-            
-            <div class="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-teal-100 font-medium">
-                <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Zdrave domače živali</div>
-                <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Osebni prevzem & nasveti</div>
-                <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10"><i class="fa-solid fa-check text-amber-400 mr-2"></i>Ugodne hobi cene</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Glavna vsebina: Kategorije in Katalog -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
         <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters"></div>
         <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
     </main>
-
-    <!-- Noga strani -->
-    <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
-            <div>
-                <div class="flex items-center space-x-2 text-white font-bold text-xl mb-3">
-                    <i class="fa-solid fa-fish-fins text-aqua-500"></i>
-                    <span>AkvaSvet</span>
-                </div>
-                <p class="text-slate-400 text-xs leading-relaxed">
-                    Spletno mesto za ljubitelje akvaristike. Ponujamo kakovostne živali iz domače vzreje ter izbrane rastline in opremo.
-                </p>
-            </div>
-            <div>
-                <h4 class="text-white font-semibold mb-3">Kontakt & Informacije</h4>
-                <ul class="space-y-2 text-xs">
-                    <li><i class="fa-solid fa-phone text-aqua-500 mr-2"></i> <span id="footer-phone">+386 40 123 456</span></li>
-                    <li><i class="fa-solid fa-envelope text-aqua-500 mr-2"></i> <span id="footer-email">info@akvasvet.si</span></li>
-                    <li><i class="fa-solid fa-location-dot text-aqua-500 mr-2"></i> <span id="footer-location">Ljubljana, Slovenija</span></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-semibold mb-3">Način prevzema</h4>
-                <p class="text-xs leading-relaxed text-slate-400">
-                    Osebni prevzem po predhodnem dogovoru na navedeni lokaciji. Za nekatere izdelke in rastline je možna dostava po pošti ali po dogovoru.
-                </p>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
-            © <span id="year">2026</span> AkvaSvet - Vse pravice pridržane.
-        </div>
+    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs">
+        © 2026 AkvaSvet - Vse pravice pridržane.
     </footer>
 
-    <!-- MODAL: PODROBNOSTI IZDELKA -->
-    <div id="product-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeProductModalOnOutside(event)">
-        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative animate-fadeIn" onclick="event.stopPropagation()">
-            <button onclick="closeProductModal()" class="absolute top-3 right-3 bg-slate-900/50 hover:bg-slate-900 text-white rounded-full w-8 h-8 flex items-center justify-center z-20 font-bold transition">&times;</button>
-            <div class="w-full md:w-1/2 h-64 md:h-auto bg-slate-100 relative">
-                <img id="detail-img" src="" alt="" class="w-full h-full object-cover">
-                <div id="detail-stock-badge" class="absolute top-3 left-3 z-10"></div>
-            </div>
-            <div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
-                <div>
-                    <span id="detail-category" class="text-xs font-bold text-teal-600 uppercase tracking-wider block mb-1"></span>
-                    <h2 id="detail-title" class="text-2xl font-bold text-slate-800 mb-2"></h2>
-                    <p id="detail-desc" class="text-slate-600 text-sm leading-relaxed mb-6 custom-scroll max-h-40 overflow-y-auto"></p>
-                </div>
-                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-slate-400 block">Cena / kos</span>
-                        <span id="detail-price" class="text-2xl font-extrabold text-slate-900"></span>
-                    </div>
-                    <button id="detail-add-btn" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-2 shadow-md shadow-teal-500/20">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span>Dodaj v košarico</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: KOŠARICA IN NAROČILO -->
-    <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end transition-opacity">
+    <!-- MODAL: KOŠARICA -->
+    <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end">
         <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-bag-shopping text-aqua-500 text-xl"></i>
-                    <h3 class="font-bold text-lg">Vaša košarica / Povpraševanje</h3>
-                </div>
-                <button onclick="toggleCartModal()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg">Vaša košarica</h3>
+                <button onclick="toggleCartModal()" class="text-xl">&times;</button>
             </div>
-            <div class="p-5 flex-grow overflow-y-auto custom-scroll space-y-4" id="cart-items-container"></div>
-            <div class="p-5 bg-slate-50 border-t border-slate-200 space-y-4">
-                <div class="flex justify-between items-center text-lg font-bold text-slate-800">
-                    <span>Skupaj za plačilo:</span>
-                    <span id="cart-total-price" class="text-teal-700 text-xl">0.00 €</span>
+            <div class="p-5 flex-grow overflow-y-auto space-y-4" id="cart-items-container"></div>
+            <div class="p-5 bg-slate-50 border-t space-y-4">
+                <div class="flex justify-between items-center text-lg font-bold">
+                    <span>Skupaj:</span>
+                    <span id="cart-total-price" class="text-teal-700">0.00 €</span>
                 </div>
-                <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 pt-2 border-t border-slate-200 text-xs">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Ime in Priimek *</label>
-                        <input type="text" id="cust-name" required placeholder="npr. Marko Novak" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Telefon *</label>
-                            <input type="tel" id="cust-phone" required placeholder="040 123 456" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">E-pošta</label>
-                            <input type="email" id="cust-email" placeholder="marko@email.com" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Način prevzema / Opombe</label>
-                        <select id="cust-delivery" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none mb-2">
-                            <option value="Osebni prevzem">Osebni prevzem (Po dogovoru)</option>
-                            <option value="Dostava po pošti">Dostava po pošti (Rastline/Oprema)</option>
-                        </select>
-                        <textarea id="cust-notes" rows="2" placeholder="Morebitna vprašanja ali željen čas prevzema..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 pt-2">
-                        <button type="submit" name="action" value="whatsapp" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 shadow transition">
-                            <i class="fa-brands fa-whatsapp text-lg"></i>
-                            <span>Naroči na WhatsApp</span>
-                        </button>
-                        <button type="submit" name="action" value="email" class="bg-teal-700 hover:bg-teal-800 text-white py-3 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 shadow transition">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span>Pošlji po E-pošti</span>
-                        </button>
-                    </div>
+                <form onsubmit="submitOrder(event)" class="space-y-3">
+                    <input type="text" id="cust-name" required placeholder="Ime in Priimek" class="w-full p-2.5 border rounded-lg text-xs">
+                    <input type="tel" id="cust-phone" required placeholder="Telefon" class="w-full p-2.5 border rounded-lg text-xs">
+                    <button type="submit" class="w-full bg-teal-700 text-white py-3 rounded-xl font-bold text-xs">Pošlji povpraševanje</button>
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-        // =========================================================================
-        // 🔑 SUPABASE POVEZAVA
-        // =========================================================================
         const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
-        
         const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-        const settings = {
-            announcement: "🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.",
-            phone: "+386 40 123 456",
-            email: "info@akvasvet.si",
-            location: "Ljubljana z okolico"
-        };
 
         let products = [];
         let cart = [];
         let activeCategory = 'vse';
 
         window.onload = function() {
-            applySettings();
             renderCategories();
             fetchProductsFromSupabase();
-            updateCartBadge();
         };
 
-        // NALAGANJE IZ SUPABASE BAZE
         async function fetchProductsFromSupabase() {
             const container = document.getElementById('product-grid');
-            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Nalaganje ponudbe iz baze...</div>`;
-
-            if (!supabaseClient) {
-                console.warn("Supabase ključi niso nastavljeni!");
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-amber-600 font-medium">Napaka pri nalaganju Supabase knjižnice.</div>`;
-                return;
-            }
-
+            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Nalaganje iz baze...</div>`;
             try {
-                const { data, error } = await supabaseClient
-                    .from('products')
-                    .select('*');
-
+                const { data, error } = await supabaseClient.from('products').select('*');
                 if (error) throw error;
                 products = data || [];
                 renderProducts();
             } catch (err) {
-                console.error("Napaka pri branju iz Supabase:", err);
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500 font-medium">Napaka pri povezavi z bazo. Preveri, ali obstaja tabela 'products'.</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo.</div>`;
             }
         }
 
-        function applySettings() {
-            document.getElementById('announcement-text').innerText = settings.announcement;
-            document.getElementById('nav-phone').innerText = settings.phone;
-            document.getElementById('nav-location').innerText = settings.location;
-            document.getElementById('footer-phone').innerText = settings.phone;
-            document.getElementById('footer-email').innerText = settings.email;
-            document.getElementById('footer-location').innerText = settings.location;
-        }
-
-        const categories = [
-            { id: 'vse', name: 'Vsi izdelki', icon: 'fa-border-all' },
-            { id: 'ribice', name: 'Akvarijske ribice', icon: 'fa-fish' },
-            { id: 'kozice', name: 'Kozice', icon: 'fa-bug' },
-            { id: 'rastline', name: 'Rastline', icon: 'fa-leaf' },
-            { id: 'oprema', name: 'Hrana & Oprema', icon: 'fa-box' }
-        ];
-
         function renderCategories() {
-            const container = document.getElementById('category-filters');
-            container.innerHTML = categories.map(cat => `
-                <button onclick="filterCategory('${cat.id}')" class="px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border ${activeCategory === cat.id ? 'bg-teal-700 text-white border-teal-700 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'}">
-                    <i class="fa-solid ${cat.icon}"></i>
-                    <span>${cat.name}</span>
+            const cats = [
+                { id: 'vse', name: 'Vsi izdelki', icon: 'fa-border-all' },
+                { id: 'ribice', name: 'Akvarijske ribice', icon: 'fa-fish' },
+                { id: 'kozice', name: 'Kozice', icon: 'fa-bug' },
+                { id: 'rastline', name: 'Rastline', icon: 'fa-leaf' },
+                { id: 'oprema', name: 'Hrana & Oprema', icon: 'fa-box' }
+            ];
+            document.getElementById('category-filters').innerHTML = cats.map(c => `
+                <button onclick="activeCategory='${c.id}'; renderCategories(); renderProducts();" class="px-4 py-2 rounded-xl text-sm font-semibold border ${activeCategory === c.id ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-slate-600 border-slate-200'}">
+                    <i class="fa-solid ${c.icon} mr-1"></i> ${c.name}
                 </button>
             `).join('');
-        }
-
-        function filterCategory(catId) {
-            activeCategory = catId;
-            renderCategories();
-            renderProducts();
         }
 
         function renderProducts() {
             const container = document.getElementById('product-grid');
             const filtered = activeCategory === 'vse' ? products : products.filter(p => p.category === activeCategory);
-
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Trenutno ni izdelkov v tej kategoriji.</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Trenutno ni izdelkov v tej kategoriji.</div>`;
                 return;
             }
-
             container.innerHTML = filtered.map(p => `
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col overflow-hidden relative group">
-                    <div class="absolute top-3 right-3 z-10">
-                        ${p.inStock 
-                            ? `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`
-                            : `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`
-                        }
-                    </div>
-                    <div onclick="openProductModal(${p.id})" class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer">
-                        <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
-                        <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <span class="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Več informacij</span>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="h-48 bg-slate-100 overflow-hidden relative">
+                            <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
+                        </div>
+                        <div class="p-4">
+                            <span class="text-[10px] font-bold text-teal-600 uppercase">${p.category || ''}</span>
+                            <h3 class="font-bold text-base text-slate-800 mt-0.5 mb-1">${p.name}</h3>
+                            <p class="text-slate-500 text-xs line-clamp-2">${p.desc || p.description || ''}</p>
                         </div>
                     </div>
-                    <div class="p-5 flex flex-col flex-grow justify-between">
-                        <div>
-                            <span class="text-[11px] font-bold text-teal-600 uppercase tracking-wider">${p.category || 'splošno'}</span>
-                            <h3 onclick="openProductModal(${p.id})" class="font-bold text-slate-800 text-base mt-0.5 mb-1 leading-snug cursor-pointer hover:text-teal-600 transition">${p.name}</h3>
-                            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4">${p.desc || p.description || 'Kakovostna ponudba domače vzreje.'}</p>
-                        </div>
-                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                            <div>
-                                <span class="text-xs text-slate-400 block">Cena / kos</span>
-                                <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price || 0).toFixed(2)} €</span>
-                            </div>
-                            <button onclick="addToCart(${p.id})" ${!p.inStock ? 'disabled' : ''} class="${p.inStock ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20' : 'bg-slate-200 text-slate-400 cursor-not-allowed'} px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Dodaj</span>
-                            </button>
-                        </div>
+                    <div class="p-4 pt-0 flex items-center justify-between border-t border-slate-100 mt-2">
+                        <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price || 0).toFixed(2)} €</span>
+                        <button onclick="addToCart(${p.id})" class="bg-teal-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold">Dodaj</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function openProductModal(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
-
-            document.getElementById('detail-img').src = product.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet';
-            document.getElementById('detail-title').innerText = product.name;
-            document.getElementById('detail-category').innerText = product.category || 'Splošno';
-            document.getElementById('detail-desc').innerText = product.desc || product.description || 'Kakovostna ponudba domače vzreje.';
-            document.getElementById('detail-price').innerText = `${parseFloat(product.price || 0).toFixed(2)} €`;
-
-            const badgeContainer = document.getElementById('detail-stock-badge');
-            if (product.inStock) {
-                badgeContainer.innerHTML = `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Na zalogi</span>`;
-            } else {
-                badgeContainer.innerHTML = `<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow">Razprodano</span>`;
-            }
-
-            const addBtn = document.getElementById('detail-add-btn');
-            if (product.inStock) {
-                addBtn.disabled = false;
-                addBtn.className = "bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-2 shadow-md shadow-teal-500/20";
-                addBtn.onclick = function() {
-                    addToCart(product.id);
-                    closeProductModal();
-                };
-            } else {
-                addBtn.disabled = true;
-                addBtn.className = "bg-slate-200 text-slate-400 cursor-not-allowed px-5 py-2.5 rounded-xl text-sm font-bold flex items-center space-x-2";
-            }
-
-            document.getElementById('product-modal').classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden');
-        }
-
-        function closeProductModalOnOutside(e) {
-            if (e.target.id === 'product-modal') {
-                closeProductModal();
-            }
-        }
-
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product || !product.inStock) return;
-
-            const existing = cart.find(item => item.id === productId);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
-
-            updateCartBadge();
-            renderCartModal();
-        }
-
-        function updateCartBadge() {
-            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cart-count-badge').innerText = totalQty;
-        }
-
-        function updateQty(id, delta) {
-            const item = cart.find(i => i.id === id);
-            if (item) {
-                item.qty += delta;
-                if (item.qty <= 0) {
-                    cart = cart.filter(i => i.id !== id);
-                }
-            }
-            updateCartBadge();
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            const item = cart.find(x => x.id === id);
+            if (item) item.qty++; else cart.push({ ...p, qty: 1 });
+            document.getElementById('cart-count-badge').innerText = cart.reduce((a,b)=>a+b.qty,0);
             renderCartModal();
         }
 
         function toggleCartModal() {
-            const modal = document.getElementById('cart-modal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                renderCartModal();
-            }
+            document.getElementById('cart-modal').classList.toggle('hidden');
+            renderCartModal();
         }
 
         function renderCartModal() {
             const container = document.getElementById('cart-items-container');
-            const totalEl = document.getElementById('cart-total-price');
-
             if (cart.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-16 text-slate-400">
-                        <i class="fa-solid fa-basket-shopping text-4xl mb-3 text-slate-300"></i>
-                        <p class="font-medium">Vaša košarica je prazna.</p>
-                        <p class="text-xs">Izberite ribice ali izdelke iz ponudbe.</p>
-                    </div>
-                `;
-                totalEl.innerText = "0.00 €";
+                container.innerHTML = `<p class="text-center text-slate-400 py-10">Košarica je prazna.</p>`;
+                document.getElementById('cart-total-price').innerText = "0.00 €";
                 return;
             }
-
             let total = 0;
-            container.innerHTML = cart.map(item => {
-                const itemTotal = (item.price || 0) * item.qty;
-                total += itemTotal;
-                return `
-                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div class="flex items-center space-x-3">
-                            <img src="${item.image || 'https://placehold.co/100x100/134e4a/ffffff?text=Akva'}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/134e4a/ffffff?text=Akva'">
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-xs">${item.name}</h4>
-                                <span class="text-slate-500 text-xs">${parseFloat(item.price || 0).toFixed(2)} € / kos</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="flex items-center border rounded-lg bg-white">
-                                <button onclick="updateQty(${item.id}, -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs">-</button>
-                                <span class="px-2 text-xs font-bold">${item.qty}</span>
-                                <button onclick="updateQty(${item.id}, 1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs">+</button>
-                            </div>
-                            <span class="font-bold text-xs text-slate-800 w-14 text-right">${itemTotal.toFixed(2)} €</span>
-                        </div>
-                    </div>
-                `;
+            container.innerHTML = cart.map(i => {
+                total += i.price * i.qty;
+                return `<div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border"><span>${i.name} (${i.qty}x)</span><b>${(i.price*i.qty).toFixed(2)} €</b></div>`;
             }).join('');
-
-            totalEl.innerText = `${total.toFixed(2)} €`;
+            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
         }
 
         function submitOrder(e) {
             e.preventDefault();
-            if (cart.length === 0) {
-                alert("Vaša košarica je prazna!");
-                return;
-            }
-
-            const action = e.submitter ? e.submitter.value : 'email';
-            const name = document.getElementById('cust-name').value;
-            const phone = document.getElementById('cust-phone').value;
-            const email = document.getElementById('cust-email').value;
-            const delivery = document.getElementById('cust-delivery').value;
-            const notes = document.getElementById('cust-notes').value;
-
-            let total = 0;
-            let itemListText = cart.map(i => {
-                const sub = (i.price || 0) * i.qty;
-                total += sub;
-                return `- ${i.name} (${i.qty}x) = ${sub.toFixed(2)} €`;
-            }).join('\n');
-
-            const message = `Pozdravljeni! Oddajam novo povpraševanje na AkvaSvet:\n\nNAROČENI ARTIKLI:\n${itemListText}\n\nSkupaj: ${total.toFixed(2)} €\n\nPODATKI STRANKE:\nIme: ${name}\nTelefon: ${phone}\nE-pošta: ${email || '/'}\nPrevzem: ${delivery}\nOpombe: ${notes || '/'}`;
-
-            if (action === 'whatsapp') {
-                const cleanPhone = settings.phone.replace(/[^0-9]/g, '');
-                const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-                window.open(url, '_blank');
-            } else {
-                const subject = encodeURIComponent(`Novo naročilo - AkvaSvet (${name})`);
-                const mailtoUrl = `mailto:${settings.email}?subject=${subject}&body=${encodeURIComponent(message)}`;
-                window.location.href = mailtoUrl;
-            }
-
-            alert("Hvala za vaše povpraševanje! Sporočilo je pripravljeno za pošiljanje.");
+            alert("Naročilo pripravljeno!");
             cart = [];
-            updateCartBadge();
+            document.getElementById('cart-count-badge').innerText = "0";
             toggleCartModal();
         }
     </script>
