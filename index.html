@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ⚡ SUPABASE KNJIŽNICA -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -58,7 +62,7 @@
                     </div>
                 </div>
 
-                <!-- Kontaktni podatki na vrhu za hitro klicanje -->
+                <!-- Kontaktni podatki na vrhu -->
                 <div class="hidden lg:flex items-center space-x-6 text-sm text-slate-600">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-phone text-aqua-600"></i>
@@ -220,9 +224,13 @@
 
     <script>
         // =========================================================================
-        // ⚙️ TVOJA PRIVATNA NADZORNA PLOŠČA (Spreminjaj tukaj na GitHubu)
+        // 🔑 SUPABASE POVEZAVA (Tvoji podaki iz Supabase API)
         // =========================================================================
+        const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
         
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
         const settings = {
             announcement: "🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.",
             phone: "+386 40 123 456",
@@ -230,29 +238,41 @@
             location: "Ljubljana z okolico"
         };
 
-        const products = [
-            { id: 1, name: "CPD - Celestial Pearl Danio", category: "ribice", price: 3.50, inStock: true, image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&q=80", desc: "Preudarno vzrejene mikro ribice s prelepimi pikami in rdečimi plavutmi. Zelo mirne." },
-            { id: 2, name: "Sterba Corydoras (Sterbiji)", category: "ribice", price: 4.20, inStock: true, image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500&q=80", desc: "Priljubljeni talni čistilci z rumenimi prsnimi plavutmi." },
-            { id: 3, name: "Ancistrus (Navadni sesalec)", category: "ribice", price: 2.50, inStock: true, image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80", desc: "Neustavljiv čistilec alg z dna in stekla akvarija." },
-            { id: 4, name: "Red Cherry Kozice", category: "kozice", price: 1.50, inStock: true, image: "https://images.unsplash.com/photo-1563281577-a7be47e20db9?w=500&q=80", desc: "Intenzivno rdeče kozice Neocaridina." },
-            { id: 5, name: "Blue Dream Kozice", category: "kozice", price: 2.20, inStock: false, image: "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=500&q=80", desc: "Nasičeno temno modre barve." },
-            { id: 6, name: "Anubias Nana na korenini", category: "rastline", price: 6.50, inStock: true, image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=500&q=80", desc: "Trpežna akvarijska rastlina z močnimi listi." },
-            { id: 7, name: "Java Moss (Javanski mah)", category: "rastline", price: 3.00, inStock: true, image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=500&q=80", desc: "Odličen mah za skrivanje mladih kozic." },
-            { id: 8, name: "Hrana v granulah za talne ribe", category: "oprema", price: 5.00, inStock: true, image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500&q=80", desc: "Visokokakovostna potapljajoča se hrana s spirulino." }
-        ];
-
-        // =========================================================================
-        // LOGIKA STRANI (Za uporabnike - ne spreminjaj spodaj)
-        // =========================================================================
+        let products = [];
         let cart = [];
         let activeCategory = 'vse';
 
         window.onload = function() {
             applySettings();
             renderCategories();
-            renderProducts();
+            fetchProductsFromSupabase();
             updateCartBadge();
         };
+
+        // NALAGANJE IZ SUPABASE BAZE
+        async function fetchProductsFromSupabase() {
+            const container = document.getElementById('product-grid');
+            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Nalaganje ponudbe iz baze...</div>`;
+
+            if (!supabaseClient) {
+                console.warn("Supabase ključi niso nastavljeni!");
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-amber-600 font-medium">Napaka pri nalaganju Supabase knjižnice.</div>`;
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*');
+
+                if (error) throw error;
+                products = data || [];
+                renderProducts();
+            } catch (err) {
+                console.error("Napaka pri branju iz Supabase:", err);
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500 font-medium">Napaka pri povezavi z bazo. Preveri, ali obstaja tabela 'products'.</div>`;
+            }
+        }
 
         function applySettings() {
             document.getElementById('announcement-text').innerText = settings.announcement;
@@ -305,21 +325,21 @@
                         }
                     </div>
                     <div onclick="openProductModal(${p.id})" class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer">
-                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
+                        <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet'">
                         <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                             <span class="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Več informacij</span>
                         </div>
                     </div>
                     <div class="p-5 flex flex-col flex-grow justify-between">
                         <div>
-                            <span class="text-[11px] font-bold text-teal-600 uppercase tracking-wider">${p.category}</span>
+                            <span class="text-[11px] font-bold text-teal-600 uppercase tracking-wider">${p.category || 'splošno'}</span>
                             <h3 onclick="openProductModal(${p.id})" class="font-bold text-slate-800 text-base mt-0.5 mb-1 leading-snug cursor-pointer hover:text-teal-600 transition">${p.name}</h3>
                             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4">${p.desc || 'Kakovostna ponudba domače vzreje.'}</p>
                         </div>
                         <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                             <div>
                                 <span class="text-xs text-slate-400 block">Cena / kos</span>
-                                <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price).toFixed(2)} €</span>
+                                <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price || 0).toFixed(2)} €</span>
                             </div>
                             <button onclick="addToCart(${p.id})" ${!p.inStock ? 'disabled' : ''} class="${p.inStock ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20' : 'bg-slate-200 text-slate-400 cursor-not-allowed'} px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
                                 <i class="fa-solid fa-plus"></i>
@@ -335,11 +355,11 @@
             const product = products.find(p => p.id === id);
             if (!product) return;
 
-            document.getElementById('detail-img').src = product.image;
+            document.getElementById('detail-img').src = product.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvaSvet';
             document.getElementById('detail-title').innerText = product.name;
-            document.getElementById('detail-category').innerText = product.category;
+            document.getElementById('detail-category').innerText = product.category || 'Splošno';
             document.getElementById('detail-desc').innerText = product.desc || 'Kakovostna ponudba domače vzreje.';
-            document.getElementById('detail-price').innerText = `${parseFloat(product.price).toFixed(2)} €`;
+            document.getElementById('detail-price').innerText = `${parseFloat(product.price || 0).toFixed(2)} €`;
 
             const badgeContainer = document.getElementById('detail-stock-badge');
             if (product.inStock) {
@@ -432,15 +452,15 @@
 
             let total = 0;
             container.innerHTML = cart.map(item => {
-                const itemTotal = item.price * item.qty;
+                const itemTotal = (item.price || 0) * item.qty;
                 total += itemTotal;
                 return `
                     <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                         <div class="flex items-center space-x-3">
-                            <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/134e4a/ffffff?text=Akva'">
+                            <img src="${item.image || 'https://placehold.co/100x100/134e4a/ffffff?text=Akva'}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/134e4a/ffffff?text=Akva'">
                             <div>
                                 <h4 class="font-bold text-slate-800 text-xs">${item.name}</h4>
-                                <span class="text-slate-500 text-xs">${parseFloat(item.price).toFixed(2)} € / kos</span>
+                                <span class="text-slate-500 text-xs">${parseFloat(item.price || 0).toFixed(2)} € / kos</span>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -474,7 +494,7 @@
 
             let total = 0;
             let itemListText = cart.map(i => {
-                const sub = i.price * i.qty;
+                const sub = (i.price || 0) * i.qty;
                 total += sub;
                 return `- ${i.name} (${i.qty}x) = ${sub.toFixed(2)} €`;
             }).join('\n');
