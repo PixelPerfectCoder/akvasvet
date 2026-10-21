@@ -111,8 +111,8 @@
                 products = data || [];
                 renderProducts();
             } catch (err) {
-                console.error("Supabase error:", err);
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo. Preveri RLS pravila.</div>`;
+                console.error(err);
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo.</div>`;
             }
         }
 
@@ -140,8 +140,21 @@
 
         function renderProducts() {
             const container = document.getElementById('product-grid');
-            const filtered = activeCategory === 'vse' ? products : products.filter(p => p.category === activeCategory);
             
+            // Željen vrstni red kategorij
+            const categoryOrder = { 'ribice': 1, 'kozice': 2, 'rastline': 3, 'hrana': 4, 'oprema': 5 };
+
+            let filtered = [];
+            if (activeCategory === 'vse') {
+                filtered = [...products].sort((a, b) => {
+                    const orderA = categoryOrder[a.category] || 99;
+                    const orderB = categoryOrder[b.category] || 99;
+                    return orderA - orderB;
+                });
+            } else {
+                filtered = products.filter(p => p.category === activeCategory);
+            }
+
             if (filtered.length === 0) {
                 container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Trenutno ni izdelkov v tej kategoriji.</div>`;
                 return;
@@ -177,8 +190,7 @@
         }
 
         function toggleCartModal() {
-            const modal = document.getElementById('cart-modal');
-            modal.classList.toggle('hidden');
+            document.getElementById('cart-modal').classList.toggle('hidden');
             renderCartModal();
         }
 
