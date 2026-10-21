@@ -49,7 +49,7 @@
         © 2026 AkvarijskiSvet - Vse pravice pridržane.
     </footer>
 
-    <!-- MODAL: KOŠARICA IN NAROČILO OVER E-POŠTE -->
+    <!-- MODAL: KOŠARICA IN NAROČILO PREKO E-POŠTE -->
     <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end">
         <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
             <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
@@ -112,5 +112,46 @@
                 products = data || [];
                 renderProducts();
             } catch (err) {
+                console.error(err);
                 container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo.</div>`;
             }
+        }
+
+        function renderCategories() {
+            const cats = [
+                { id: 'vse', name: 'Vsi izdelki', icon: 'fa-border-all' },
+                { id: 'ribice', name: 'Akvarijske ribice', icon: 'fa-fish' },
+                { id: 'kozice', name: 'Kozice', icon: 'fa-bug' },
+                { id: 'rastline', name: 'Rastline', icon: 'fa-leaf' },
+                { id: 'hrana', name: 'Hrana', icon: 'fa-bowl-food' },
+                { id: 'oprema', name: 'Oprema', icon: 'fa-box' }
+            ];
+            document.getElementById('category-filters').innerHTML = cats.map(c => `
+                <button onclick="filterCategory('${c.id}')" class="px-4 py-2 rounded-xl text-sm font-semibold border ${activeCategory === c.id ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-slate-600 border-slate-200'}">
+                    <i class="fa-solid ${c.icon} mr-1"></i> ${c.name}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(catId) {
+            activeCategory = catId;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('product-grid');
+            const filtered = activeCategory === 'vse' ? products : products.filter(p => p.category === activeCategory);
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Trenutno ni izdelkov v tej kategoriji.</div>`;
+                return;
+            }
+            container.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="h-48 bg-slate-100 overflow-hidden relative">
+                            <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet'">
+                        </div>
+                        <div class="p-4">
+                            <span class="text-[10px] font-bold text-teal-600 uppercase">${p.category || ''}</span>
+                            <h3 class="font-bold text-base text-slate-
