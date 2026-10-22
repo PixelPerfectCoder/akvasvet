@@ -167,13 +167,18 @@
                 if (error) throw error;
                 
                 if (data && data.length > 0) {
+                    console.log("Podatki iz Supabase:", data); // To ti pokaže stolpce v konzoli (pritisni F12 v brskalniku)
+                    
                     products = data.map(p => {
-                        // Preveri vsa možna imena stolpcev za zalogo (in_stock, zaloga, stock, quantity)
+                        // Preverimo katero koli možno ime stolpca v bazi
                         let isStockAvailable = true;
+                        
                         if (p.in_stock !== undefined) isStockAvailable = Boolean(p.in_stock);
                         else if (p.zaloga !== undefined) isStockAvailable = Boolean(p.zaloga);
-                        else if (p.stock !== undefined) isStockAvailable = typeof p.stock === 'boolean' ? p.stock : Number(p.stock) > 0;
-                        else if (p.quantity !== undefined) isStockAvailable = Number(p.quantity) > 0;
+                        else if (p.stock !== undefined) isStockAvailable = Boolean(p.stock);
+                        else if (p.is_stock !== undefined) isStockAvailable = Boolean(p.is_stock);
+                        else if (p.active !== undefined) isStockAvailable = Boolean(p.active);
+                        else if (p.status !== undefined) isStockAvailable = String(p.status).toLowerCase() === 'true' || String(p.status).toLowerCase() === 'na zalogi';
 
                         return {
                             id: p.id,
