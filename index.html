@@ -63,11 +63,13 @@
         </button>
     </div>
 
+    <!-- PRODUCT MODAL -->
     <div id="product-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
             <button onclick="closeProductModal()" class="absolute top-4 right-4 bg-slate-900/50 hover:bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 transition">&times;</button>
             <div class="h-64 bg-slate-100 overflow-hidden relative">
                 <img id="modal-img" src="" class="w-full h-full object-cover">
+                <div id="modal-stock-badge" class="absolute top-4 left-4"></div>
             </div>
             <div class="p-6 space-y-4">
                 <span id="modal-category" class="text-xs font-bold text-teal-600 uppercase tracking-wider"></span>
@@ -88,6 +90,7 @@
         </div>
     </div>
 
+    <!-- CART MODAL -->
     <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end">
         <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
             <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
@@ -137,10 +140,10 @@
         const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         const defaultProducts = [
-            { id: 1, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, desc: "Zdrave in živahne akvarijske ribice iz domače vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
-            { id: 2, name: "Neonske ribice (Paracheirodon innesi)", category: "ribice", price: 1.20, desc: "Priljubljena jata svetlečih akvarijskih ribic.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
-            { id: 3, name: "Red Cherry Kozice", category: "kozice", price: 1.00, desc: "Rdeče akvarijske kozice, odlične za čiščenje alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
-            { id: 4, name: "Java Mah (Taxiphyllum barbieri)", category: "rastline", price: 3.50, desc: "Preprosta in nezahtevna akvarijska rastlina za kozice.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" }
+            { id: 1, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, in_stock: true, desc: "Zdrave in živahne akvarijske ribice iz domače vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
+            { id: 2, name: "Neonske ribice (Paracheirodon innesi)", category: "ribice", price: 1.20, in_stock: false, desc: "Priljubljena jata svetlečih akvarijskih ribic.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
+            { id: 3, name: "Red Cherry Kozice", category: "kozice", price: 1.00, in_stock: true, desc: "Rdeče akvarijske kozice, odlične za čiščenje alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
+            { id: 4, name: "Java Mah (Taxiphyllum barbieri)", category: "rastline", price: 3.50, in_stock: true, desc: "Preprosta in nezahtevna akvarijska rastlina za kozice.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" }
         ];
 
         let products = [];
@@ -164,14 +167,24 @@
                 if (error) throw error;
                 
                 if (data && data.length > 0) {
-                    products = data.map(p => ({
-                        id: p.id,
-                        name: p.name || p.title || 'Neznan izdelek',
-                        category: p.category || 'ribice',
-                        price: parseFloat(p.price || 0),
-                        desc: p.desc || p.description || 'Kakovostna ponudba domače vzreje.',
-                        image: p.image || p.image_url || 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500'
-                    }));
+                    products = data.map(p => {
+                        // Preveri vsa možna imena stolpcev za zalogo (in_stock, zaloga, stock, quantity)
+                        let isStockAvailable = true;
+                        if (p.in_stock !== undefined) isStockAvailable = Boolean(p.in_stock);
+                        else if (p.zaloga !== undefined) isStockAvailable = Boolean(p.zaloga);
+                        else if (p.stock !== undefined) isStockAvailable = typeof p.stock === 'boolean' ? p.stock : Number(p.stock) > 0;
+                        else if (p.quantity !== undefined) isStockAvailable = Number(p.quantity) > 0;
+
+                        return {
+                            id: p.id,
+                            name: p.name || p.title || 'Neznan izdelek',
+                            category: p.category || 'ribice',
+                            price: parseFloat(p.price || 0),
+                            in_stock: isStockAvailable,
+                            desc: p.desc || p.description || 'Kakovostna ponudba domače vzreje.',
+                            image: p.image || p.image_url || 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500'
+                        };
+                    });
                 } else {
                     products = defaultProducts;
                 }
@@ -225,11 +238,17 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(p => `
+            container.innerHTML = filtered.map(p => {
+                const stockBadge = p.in_stock 
+                    ? `<span class="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center space-x-1"><i class="fa-solid fa-check"></i><span>Na zalogi</span></span>`
+                    : `<span class="bg-slate-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center space-x-1"><i class="fa-solid fa-xmark"></i><span>Ni na zalogi</span></span>`;
+
+                return `
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between">
                     <div>
                         <div class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer" onclick="openProductModal('${p.id}')">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500'">
+                            <div class="absolute top-3 right-3">${stockBadge}</div>
                         </div>
                         <div class="p-4">
                             <span class="text-[10px] font-bold text-teal-600 uppercase tracking-wider">${p.category}</span>
@@ -242,7 +261,7 @@
                         <button onclick="addToCartDirect('${p.id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow">Dodaj</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function openProductModal(id) {
@@ -256,6 +275,13 @@
             document.getElementById('modal-title').innerText = p.name;
             document.getElementById('modal-desc').innerText = p.desc;
             document.getElementById('modal-price').innerText = p.price.toFixed(2) + ' €';
+
+            const modalStockBadge = document.getElementById('modal-stock-badge');
+            if (modalStockBadge) {
+                modalStockBadge.innerHTML = p.in_stock 
+                    ? `<span class="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md"><i class="fa-solid fa-check mr-1"></i>Na zalogi</span>`
+                    : `<span class="bg-slate-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md"><i class="fa-solid fa-xmark mr-1"></i>Ni na zalogi</span>`;
+            }
             
             document.getElementById('modal-add-btn').onclick = function() {
                 addModalToCart();
