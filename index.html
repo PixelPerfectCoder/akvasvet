@@ -140,10 +140,10 @@
         const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         const defaultProducts = [
-            { id: 1, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, in_stock: true, desc: "Zdrave in živahne akvarijske ribice iz domače vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
-            { id: 2, name: "Neonske ribice (Paracheirodon innesi)", category: "ribice", price: 1.20, in_stock: false, desc: "Priljubljena jata svetlečih akvarijskih ribic.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
-            { id: 3, name: "Red Cherry Kozice", category: "kozice", price: 1.00, in_stock: true, desc: "Rdeče akvarijske kozice, odlične za čiščenje alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
-            { id: 4, name: "Java Mah (Taxiphyllum barbieri)", category: "rastline", price: 3.50, in_stock: true, desc: "Preprosta in nezahtevna akvarijska rastlina za kozice.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" }
+            { id: 1, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, instock: true, desc: "Zdrave in živahne akvarijske ribice iz domače vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
+            { id: 2, name: "Neonske ribice (Paracheirodon innesi)", category: "ribice", price: 1.20, instock: false, desc: "Priljubljena jata svetlečih akvarijskih ribic.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
+            { id: 3, name: "Red Cherry Kozice", category: "kozice", price: 1.00, instock: true, desc: "Rdeče akvarijske kozice, odlične za čiščenje alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
+            { id: 4, name: "Java Mah (Taxiphyllum barbieri)", category: "rastline", price: 3.50, instock: true, desc: "Preprosta in nezahtevna akvarijska rastlina za kozice.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" }
         ];
 
         let products = [];
@@ -167,18 +167,14 @@
                 if (error) throw error;
                 
                 if (data && data.length > 0) {
-                    console.log("Podatki iz Supabase:", data); // To ti pokaže stolpce v konzoli (pritisni F12 v brskalniku)
-                    
                     products = data.map(p => {
-                        // Preverimo katero koli možno ime stolpca v bazi
+                        // Točno preverimo tvoj stolpec "instock" (ter za vsak slučaj še ostale možne)
                         let isStockAvailable = true;
                         
-                        if (p.in_stock !== undefined) isStockAvailable = Boolean(p.in_stock);
+                        if (p.instock !== undefined) isStockAvailable = Boolean(p.instock);
+                        else if (p.in_stock !== undefined) isStockAvailable = Boolean(p.in_stock);
                         else if (p.zaloga !== undefined) isStockAvailable = Boolean(p.zaloga);
                         else if (p.stock !== undefined) isStockAvailable = Boolean(p.stock);
-                        else if (p.is_stock !== undefined) isStockAvailable = Boolean(p.is_stock);
-                        else if (p.active !== undefined) isStockAvailable = Boolean(p.active);
-                        else if (p.status !== undefined) isStockAvailable = String(p.status).toLowerCase() === 'true' || String(p.status).toLowerCase() === 'na zalogi';
 
                         return {
                             id: p.id,
@@ -302,178 +298,3 @@
             currentModalQty += change;
             if (currentModalQty < 1) currentModalQty = 1;
             document.getElementById('modal-qty').innerText = currentModalQty;
-        }
-
-        function addModalToCart() {
-            const p = products.find(x => String(x.id) === String(currentModalProductId));
-            if (!p) return;
-            const item = cart.find(x => String(x.id) === String(currentModalProductId));
-            if (item) {
-                item.qty += currentModalQty;
-            } else {
-                cart.push({ ...p, qty: currentModalQty });
-            }
-            saveCart();
-            closeProductModal();
-            toggleCartModal();
-        }
-
-        function addToCartDirect(id) {
-            const p = products.find(x => String(x.id) === String(id));
-            if (!p) return;
-            const item = cart.find(x => String(x.id) === String(id));
-            if (item) {
-                item.qty++;
-            } else {
-                cart.push({ ...p, qty: 1 });
-            }
-            saveCart();
-            toggleCartModal();
-        }
-
-        function updateCartQty(id, change) {
-            const item = cart.find(x => String(x.id) === String(id));
-            if (!item) return;
-            item.qty += change;
-            if (item.qty <= 0) {
-                removeFromCart(id);
-            } else {
-                saveCart();
-                renderCartModal();
-            }
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(x => String(x.id) !== String(id));
-            saveCart();
-            renderCartModal();
-        }
-
-        function saveCart() {
-            localStorage.setItem('akvasvet_cart', JSON.stringify(cart));
-            updateCartBadge();
-        }
-
-        function updateCartBadge() {
-            const totalQty = cart.reduce((a, b) => a + b.qty, 0);
-            const totalPrice = cart.reduce((a, b) => a + ((b.price || 0) * b.qty), 0);
-
-            const badgeDesktop = document.getElementById('cart-count-badge-desktop');
-            if (badgeDesktop) badgeDesktop.innerText = totalQty;
-            
-            const badgeMobile = document.getElementById('cart-count-badge-mobile');
-            if (badgeMobile) badgeMobile.innerText = totalQty;
-
-            const mobileTotal = document.getElementById('mobile-cart-total');
-            if (mobileTotal) mobileTotal.innerText = totalPrice.toFixed(2) + " €";
-        }
-
-        function toggleCartModal() {
-            document.getElementById('cart-modal').classList.toggle('hidden');
-            renderCartModal();
-        }
-
-        function renderCartModal() {
-            const container = document.getElementById('cart-items-container');
-            updateCartBadge();
-            
-            if (cart.length === 0) {
-                container.innerHTML = `<p class="text-center text-slate-400 py-10">Košarica je prazna.</p>`;
-                document.getElementById('cart-total-price').innerText = "0.00 €";
-                return;
-            }
-            let total = 0;
-            container.innerHTML = cart.map(i => {
-                const sub = (i.price || 0) * i.qty;
-                total += sub;
-                return `
-                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div class="pr-2">
-                            <span class="font-semibold text-xs text-slate-800 block">${i.name}</span>
-                            <span class="text-[11px] text-slate-400">${parseFloat(i.price || 0).toFixed(2)} € / kos</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
-                                <button onclick="updateCartQty('${i.id}', -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">-</button>
-                                <span class="px-2 py-1 text-xs font-bold text-slate-800">${i.qty}</span>
-                                <button onclick="updateCartQty('${i.id}', 1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">+</button>
-                            </div>
-                            <span class="font-bold text-xs text-teal-700 w-16 text-right">${sub.toFixed(2)} €</span>
-                            <button onclick="removeFromCart('${i.id}')" class="text-rose-400 hover:text-rose-600 px-1 text-xs"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
-        }
-
-        async function submitOrder(e) {
-            e.preventDefault();
-            if (cart.length === 0) {
-                alert("Vaša košarica je prazna!");
-                return;
-            }
-
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.innerText = "Pošiljanje naročila...";
-
-            const name = document.getElementById('cust-name').value;
-            const email = document.getElementById('cust-email').value;
-            const phone = document.getElementById('cust-phone').value;
-            const notes = document.getElementById('cust-notes').value;
-
-            let total = 0;
-            let itemListText = cart.map(i => {
-                const sub = (i.price || 0) * i.qty;
-                total += sub;
-                return `- ${i.name} (${i.qty}x) = ${sub.toFixed(2)} €`;
-            }).join('\n');
-
-            const emailMessage = `NOVO NAROČILO - AKVARIJSKI SVET\n\nIme in priimek: ${name}\nE-pošta: ${email}\nTelefon: ${phone}\nOpombe: ${notes || '/'}\n\nNAROČENI IZDELKI:\n${itemListText}\n\nSKUPAJ ZA PLAČILO: ${total.toFixed(2)} €`;
-
-            try {
-                if (supabaseClient) {
-                    await supabaseClient.from('orders').insert([
-                        { customer_name: name, customer_email: email, customer_phone: phone, notes: notes || '', items: itemListText, total_price: total }
-                    ]);
-                }
-            } catch (err) {
-                console.log("Supabase sporočilo:", err);
-            }
-
-            try {
-                const response = await fetch("https://api.web3forms.com/submit", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        access_key: WEB3FORMS_KEY,
-                        subject: `Novo naročilo: ${name}`,
-                        from_name: "AkvarijskiSvet",
-                        replyto: email,
-                        message: emailMessage
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    alert("Hvala za naročilo! Vaše naročilo je bilo uspešno posredovano. Kmalu vas bomo kontaktirali.");
-                    cart = [];
-                    saveCart();
-                    document.getElementById('order-form').reset();
-                    toggleCartModal();
-                } else {
-                    alert("Prišlo je do težave pri pošiljanju. Prosimo, poskusite znova.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Težava s povezavo. Prosimo, poskusite znova.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>Oddaj naročilo</span>`;
-            }
-        }
-    </script>
-</body>
-</html>
