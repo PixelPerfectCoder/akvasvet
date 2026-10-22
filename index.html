@@ -96,8 +96,8 @@
         <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
             <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
                 <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-box-check text-teal-400 text-lg"></i>
-                    <h3 class="font-bold text-lg">Vaše Naročilo</h3>
+                    <i class="fa-solid fa-cart-shopping text-teal-400 text-lg"></i>
+                    <h3 class="font-bold text-lg">Vaša Košarica</h3>
                 </div>
                 <button onclick="toggleCartModal()" class="text-xl hover:text-teal-400">&times;</button>
             </div>
@@ -136,11 +136,17 @@
     <script>
         const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
-        
-        // Tvoj Web3Forms ključ
         const WEB3FORMS_KEY = "59254fb0-9372-4565-a64b-a51ed72ed00e";
 
         const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        // Rezervni izdelki, če baza še nima vpisanih podatkov
+        const defaultProducts = [
+            { id: 1, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, desc: "Zdrave in živahne akvarijske ribice iz domače vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
+            { id: 2, name: "Neonske ribice (Paracheirodon innesi)", category: "ribice", price: 1.20, desc: "Priljubljena jata svetlečih akvarijskih ribic.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
+            { id: 3, name: "Red Cherry Kozice", category: "kozice", price: 1.00, desc: "Rdeče akvarijske kozice, odlične za čiščenje alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
+            { id: 4, name: "Java Mah (Taxiphyllum barbieri)", category: "rastline", price: 3.50, desc: "Preprosta in nezahtevna akvarijska rastlina za kozice.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" }
+        ];
 
         let products = [];
         let cart = JSON.parse(localStorage.getItem('akvasvet_cart')) || [];
@@ -158,13 +164,27 @@
             const container = document.getElementById('product-grid');
             container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Nalaganje iz baze...</div>`;
             try {
+                if (!supabaseClient) throw new Error("Supabase ni povezan");
                 const { data, error } = await supabaseClient.from('products').select('*');
                 if (error) throw error;
-                products = data || [];
+                
+                if (data && data.length > 0) {
+                    products = data.map(p => ({
+                        id: p.id,
+                        name: p.name || p.title || 'Neznan izdelek',
+                        category: p.category || 'ribice',
+                        price: parseFloat(p.price || 0),
+                        desc: p.desc || p.description || 'Kakovostna ponudba domače vzreje.',
+                        image: p.image || p.image_url || 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500'
+                    }));
+                } else {
+                    products = defaultProducts;
+                }
                 renderProducts();
             } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo.</div>`;
+                console.error("Supabase opozorilo:", err);
+                products = defaultProducts;
+                renderProducts();
             }
         }
 
@@ -213,27 +233,104 @@
             container.innerHTML = filtered.map(p => `
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between">
                     <div>
-                        <div class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer" onclick="openProductModal(${p.id})">
-                            <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet'">
+                        <div class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer" onclick="openProductModal('${p.id}')">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500'">
                         </div>
                         <div class="p-4">
-                            <span class="text-[10px] font-bold text-teal-600 uppercase tracking-wider">${p.category || 'splošno'}</span>
-                            <h3 class="font-bold text-base text-slate-800 mt-0.5 mb-1 cursor-pointer hover:text-teal-700" onclick="openProductModal(${p.id})">${p.name}</h3>
-                            <p class="text-slate-500 text-xs line-clamp-2 leading-relaxed">${p.desc || p.description || 'Kakovostna ponudba domače vzreje.'}</p>
+                            <span class="text-[10px] font-bold text-teal-600 uppercase tracking-wider">${p.category}</span>
+                            <h3 class="font-bold text-base text-slate-800 mt-0.5 mb-1 cursor-pointer hover:text-teal-700" onclick="openProductModal('${p.id}')">${p.name}</h3>
+                            <p class="text-slate-500 text-xs line-clamp-2 leading-relaxed">${p.desc}</p>
                         </div>
                     </div>
                     <div class="p-4 pt-0 flex items-center justify-between border-t border-slate-100 mt-2">
-                        <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price || 0).toFixed(2)} €</span>
-                        <button onclick="addToCartDirect(${p.id})" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow">Dodaj</button>
+                        <span class="text-lg font-extrabold text-slate-900">${p.price.toFixed(2)} €</span>
+                        <button onclick="addToCartDirect('${p.id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow">Dodaj</button>
                     </div>
                 </div>
             `).join('');
         }
 
         function openProductModal(id) {
-            const p = products.find(x => x.id === id);
+            const p = products.find(x => String(x.id) === String(id));
             if (!p) return;
-            currentModalProductId = id;
+            currentModalProductId = p.id;
             currentModalQty = 1;
             document.getElementById('modal-qty').innerText = currentModalQty;
-            document.getElementById('modal-img').src = p.image || '
+            document.getElementById('modal-img').src = p.image;
+            document.getElementById('modal-category').innerText = p.category;
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-desc').innerText = p.desc;
+            document.getElementById('modal-price').innerText = p.price.toFixed(2) + ' €';
+            
+            document.getElementById('modal-add-btn').onclick = function() {
+                addModalToCart();
+            };
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function changeModalQty(change) {
+            currentModalQty += change;
+            if (currentModalQty < 1) currentModalQty = 1;
+            document.getElementById('modal-qty').innerText = currentModalQty;
+        }
+
+        function addModalToCart() {
+            const p = products.find(x => String(x.id) === String(currentModalProductId));
+            if (!p) return;
+            const item = cart.find(x => String(x.id) === String(currentModalProductId));
+            if (item) {
+                item.qty += currentModalQty;
+            } else {
+                cart.push({ ...p, qty: currentModalQty });
+            }
+            saveCart();
+            closeProductModal();
+            toggleCartModal();
+        }
+
+        function addToCartDirect(id) {
+            const p = products.find(x => String(x.id) === String(id));
+            if (!p) return;
+            const item = cart.find(x => String(x.id) === String(id));
+            if (item) {
+                item.qty++;
+            } else {
+                cart.push({ ...p, qty: 1 });
+            }
+            saveCart();
+            toggleCartModal();
+        }
+
+        function updateCartQty(id, change) {
+            const item = cart.find(x => String(x.id) === String(id));
+            if (!item) return;
+            item.qty += change;
+            if (item.qty <= 0) {
+                removeFromCart(id);
+            } else {
+                saveCart();
+                renderCartModal();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(x => String(x.id) !== String(id));
+            saveCart();
+            renderCartModal();
+        }
+
+        function saveCart() {
+            localStorage.setItem('akvasvet_cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((a, b) => a + b.qty, 0);
+            const totalPrice = cart.reduce((a, b) => a + ((b.price || 0) * b.qty), 0);
+
+            const badgeDesktop = document.getElementById('cart-count-badge-desktop');
+            if (badgeDesktop)
