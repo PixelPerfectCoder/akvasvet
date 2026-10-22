@@ -235,12 +235,12 @@
 
         // Fallback default products if Supabase fails or is empty
         const defaultProducts = [
-            { id: 101, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, instock: true, desc: "Zdrave in živahne akvarijske ribice iz domače akvarijske vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
-            { id: 102, name: "Neonske ribice", category: "ribice", price: 1.20, instock: false, desc: "Priljubljena jata svetlečih akvarijskih ribic za mirne akvarije.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
-            { id: 103, name: "Red Cherry Kozice", category: "kozice", price: 1.00, instock: true, desc: "Rdeče akvarijske kozice, odlične za čiščenje nezaželenih alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
-            { id: 104, name: "Java Mah (Taxiphyllum)", category: "rastline", price: 3.50, instock: true, desc: "Preprosta in nezahtevna akvarijska rastlina, idealna za zaklon kozic.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" },
-            { id: 105, name: "Anubias Nana", category: "rastline", price: 4.80, instock: true, desc: "Robustna rastlina s temno zelenimi listi, primerna za pritrjevanje na korenine ali korenike.", image: "https://images.unsplash.com/photo-1508873696983-2df515122519?w=500" },
-            { id: 106, name: "Astatotilapia burtoni", category: "ribice", price: 3.00, instock: true, desc: "Afriški ciklid z izjemnimi barvnimi vzorci in zanimivim vedenjem.", image: "https://images.unsplash.com/photo-1520301251435-71286c076595?w=500" }
+            { id: 101, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, quantity: 15, desc: "Zdrave in živahne akvarijske ribice iz domače akvarijske vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
+            { id: 102, name: "Neonske ribice", category: "ribice", price: 1.20, quantity: 0, desc: "Priljubljena jata svetlečih akvarijskih ribic za mirne akvarije.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
+            { id: 103, name: "Red Cherry Kozice", category: "kozice", price: 1.00, quantity: 30, desc: "Rdeče akvarijske kozice, odlične za čiščenje nezaželenih alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
+            { id: 104, name: "Java Mah (Taxiphyllum)", category: "rastline", price: 3.50, quantity: 8, desc: "Preprosta in nezahtevna akvarijska rastlina, idealna za zaklon kozic.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" },
+            { id: 105, name: "Anubias Nana", category: "rastline", price: 4.80, quantity: 5, desc: "Robustna rastlina s temno zelenimi listi, primerna za pritrjevanje na korenine ali korenike.", image: "https://images.unsplash.com/photo-1508873696983-2df515122519?w=500" },
+            { id: 106, name: "Astatotilapia burtoni", category: "ribice", price: 3.00, quantity: 4, desc: "Afriški ciklid z izjemnimi barvnimi vzorci in zanimivim vedenjem.", image: "https://images.unsplash.com/photo-1520301251435-71286c076595?w=500" }
         ];
 
         // Global State
@@ -281,25 +281,17 @@
 
                 if (data && data.length > 0) {
                     products = data.map(p => {
-                        // 1. Stock Fallback logic
-                        let stockVal = true;
-                        if (p.instock !== undefined && p.instock !== null) stockVal = p.instock;
-                        else if (p.in_stock !== undefined && p.in_stock !== null) stockVal = p.in_stock;
-                        else if (p.instinstock !== undefined && p.instinstock !== null) stockVal = p.instinstock;
-                        else if (p.zaloga !== undefined && p.zaloga !== null) stockVal = p.zaloga;
-                        else if (p.stock !== undefined && p.stock !== null) stockVal = p.stock;
+                        // Stock quantity fallback logic
+                        let qtyVal = 0;
+                        if (p.quantity !== undefined && p.quantity !== null) qtyVal = parseInt(p.quantity);
+                        else if (p.zaloga !== undefined && p.zaloga !== null) qtyVal = parseInt(p.zaloga);
+                        else if (p.stock !== undefined && p.stock !== null) qtyVal = parseInt(p.stock);
+                        else if (p.instock !== undefined && p.instock !== null) qtyVal = p.instock ? 10 : 0;
 
-                        // Normalize boolean or text stock
-                        if (typeof stockVal === 'string') {
-                            stockVal = stockVal.toLowerCase() === 'true' || stockVal === '1' || stockVal.toLowerCase() === 'da';
-                        } else {
-                            stockVal = Boolean(stockVal);
-                        }
-
-                        // 2. Image Fallback logic
+                        // Image Fallback logic
                         let imgVal = p.image || p.image_url || p.img || p.slika || FALLBACK_IMAGE;
 
-                        // 3. Category Fallback logic
+                        // Category Fallback logic
                         let catVal = (p.category || p.kategorija || 'ostalo').toLowerCase().trim();
 
                         return {
@@ -307,7 +299,7 @@
                             name: p.name || p.naziv || p.title || 'Neimenovan izdelek',
                             category: catVal,
                             price: parseFloat(p.price || p.cena || 0),
-                            instock: stockVal,
+                            quantity: qtyVal,
                             desc: p.desc || p.description || p.opis || 'Za ta izdelek ni dodatnega opisa.',
                             image: imgVal
                         };
@@ -329,7 +321,6 @@
             const container = document.getElementById('category-filters');
             if (!container) return;
 
-            // Extract unique categories
             const rawCategories = Array.from(new Set(products.map(p => p.category)));
             const allCats = ['vse', ...rawCategories];
 
@@ -375,6 +366,7 @@
             }
 
             container.innerHTML = filtered.map(p => {
+                const inStock = p.quantity > 0;
                 return `
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group">
                         <!-- Image & Badge -->
@@ -382,8 +374,8 @@
                             <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}';">
                             <div class="absolute top-3 left-3">
                                 ${
-                                    p.instock 
-                                        ? '<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fa-solid fa-check mr-1"></i> Na zalogi</span>'
+                                    inStock 
+                                        ? `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fa-solid fa-check mr-1"></i> Na zalogi: ${p.quantity} kos</span>`
                                         : '<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fa-solid fa-xmark mr-1"></i> Ni na zalogi</span>'
                                 }
                             </div>
@@ -408,9 +400,9 @@
                                     </button>
                                     <button 
                                         onclick="addToCart(${p.id})" 
-                                        ${!p.instock ? 'disabled' : ''} 
+                                        ${!inStock ? 'disabled' : ''} 
                                         class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition shadow-sm ${
-                                            p.instock 
+                                            inStock 
                                                 ? 'bg-teal-600 hover:bg-teal-700 text-white active:scale-95' 
                                                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                         }">
@@ -441,12 +433,13 @@
             document.getElementById('modal-qty').textContent = currentModalQty;
 
             const badgeContainer = document.getElementById('modal-stock-badge');
-            badgeContainer.innerHTML = product.instock 
-                ? '<span class="bg-emerald-500/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-check mr-1"></i> Na zalogi</span>'
+            const inStock = product.quantity > 0;
+            badgeContainer.innerHTML = inStock 
+                ? `<span class="bg-emerald-500/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-check mr-1"></i> Na zalogi: ${product.quantity} kos</span>`
                 : '<span class="bg-rose-500/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-xmark mr-1"></i> Ni na zalogi</span>';
 
             const addBtn = document.getElementById('modal-add-btn');
-            if (product.instock) {
+            if (inStock) {
                 addBtn.disabled = false;
                 addBtn.className = "bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition shadow-md flex items-center space-x-2";
                 addBtn.onclick = function() {
@@ -467,17 +460,31 @@
         }
 
         function changeModalQty(delta) {
+            const product = products.find(p => p.id == currentModalProductId);
+            if (!product) return;
+
             currentModalQty += delta;
             if (currentModalQty < 1) currentModalQty = 1;
+            if (currentModalQty > product.quantity) {
+                currentModalQty = product.quantity;
+                showToast(`Na zalogi je največ ${product.quantity} kosov.`, "error");
+            }
             document.getElementById('modal-qty').textContent = currentModalQty;
         }
 
         // --- SHOPPING CART LOGIC ---
         function addToCart(productId, qty = 1) {
             const product = products.find(p => p.id == productId);
-            if (!product || !product.instock) return;
+            if (!product || product.quantity <= 0) return;
 
             const existingIndex = cart.findIndex(item => item.id == productId);
+            const currentQtyInCart = existingIndex > -1 ? cart[existingIndex].qty : 0;
+
+            if (currentQtyInCart + qty > product.quantity) {
+                showToast(`V košarico ne morete dodati več kot ${product.quantity} kosov tega izdelka.`, "error");
+                return;
+            }
+
             if (existingIndex > -1) {
                 cart[existingIndex].qty += qty;
             } else {
@@ -486,7 +493,8 @@
                     name: product.name,
                     price: product.price,
                     image: product.image,
-                    qty: qty
+                    qty: qty,
+                    maxQty: product.quantity
                 });
             }
 
@@ -495,11 +503,18 @@
         }
 
         function changeCartQty(productId, delta) {
+            const product = products.find(p => p.id == productId);
             const index = cart.findIndex(item => item.id == productId);
-            if (index > -1) {
-                cart[index].qty += delta;
-                if (cart[index].qty <= 0) {
+            if (index > -1 && product) {
+                const newQty = cart[index].qty + delta;
+                if (newQty > product.quantity) {
+                    showToast(`Na zalogi je samo še ${product.quantity} kosov.`, "error");
+                    return;
+                }
+                if (newQty <= 0) {
                     cart.splice(index, 1);
+                } else {
+                    cart[index].qty = newQty;
                 }
                 saveCart();
             }
@@ -648,7 +663,6 @@
                 }
             }
 
-            // Handle completion result
             submitBtn.disabled = false;
             submitBtnText.textContent = "Oddaj naročilo";
 
@@ -679,12 +693,10 @@
 
             container.appendChild(toast);
 
-            // Animate in
             setTimeout(() => {
                 toast.classList.remove('opacity-0', 'translate-y-2');
             }, 10);
 
-            // Animate out
             setTimeout(() => {
                 toast.classList.add('opacity-0', '-translate-y-2');
                 setTimeout(() => toast.remove(), 300);
