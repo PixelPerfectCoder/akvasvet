@@ -104,4 +104,265 @@
                         <input type="tel" id="cust-phone" required placeholder="npr. 040 123 456" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
                     </div>
                     <div>
-                        <label
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Opombe / Željen čas prevzema</label>
+                        <textarea id="cust-notes" rows="2" placeholder="Napišite morebitna vprašanja ali želje..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Pošlji naročilo preko E-pošte</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
+        const MOJ_EMAIL = "info@akvarijskisvet.si";
+
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('akvasvet_cart')) || [];
+        let activeCategory = 'vse';
+        let currentModalProductId = null;
+        let currentModalQty = 1;
+
+        window.onload = function() {
+            updateCartBadge();
+            renderCategories();
+            fetchProductsFromSupabase();
+        };
+
+        async function fetchProductsFromSupabase() {
+            const container = document.getElementById('product-grid');
+            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Nalaganje iz baze...</div>`;
+            try {
+                const { data, error } = await supabaseClient.from('products').select('*');
+                if (error) throw error;
+                products = data || [];
+                renderProducts();
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo.</div>`;
+            }
+        }
+
+        function renderCategories() {
+            const cats = [
+                { id: 'vse', name: 'Vsi izdelki', icon: 'fa-border-all' },
+                { id: 'ribice', name: 'Akvarijske ribice', icon: 'fa-fish' },
+                { id: 'kozice', name: 'Kozice', icon: 'fa-bug' },
+                { id: 'rastline', name: 'Rastline', icon: 'fa-leaf' },
+                { id: 'hrana', name: 'Hrana', icon: 'fa-bowl-food' },
+                { id: 'oprema', name: 'Oprema', icon: 'fa-box' }
+            ];
+            document.getElementById('category-filters').innerHTML = cats.map(c => `
+                <button onclick="filterCategory('${c.id}')" class="px-4 py-2 rounded-xl text-sm font-semibold border ${activeCategory === c.id ? 'bg-teal-700 text-white border-teal-700 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'}">
+                    <i class="fa-solid ${c.icon} mr-1"></i> ${c.name}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(catId) {
+            activeCategory = catId;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('product-grid');
+            const categoryOrder = { 'ribice': 1, 'kozice': 2, 'rastline': 3, 'hrana': 4, 'oprema': 5 };
+
+            let filtered = [];
+            if (activeCategory === 'vse') {
+                filtered = [...products].sort((a, b) => {
+                    const orderA = categoryOrder[a.category] || 99;
+                    const orderB = categoryOrder[b.category] || 99;
+                    return orderA - orderB;
+                });
+            } else {
+                filtered = products.filter(p => p.category === activeCategory);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Trenutno ni izdelkov v tej kategoriji.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer" onclick="openProductModal(${p.id})">
+                            <img src="${p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet'">
+                        </div>
+                        <div class="p-4">
+                            <span class="text-[10px] font-bold text-teal-600 uppercase tracking-wider">${p.category || 'splošno'}</span>
+                            <h3 class="font-bold text-base text-slate-800 mt-0.5 mb-1 cursor-pointer hover:text-teal-700" onclick="openProductModal(${p.id})">${p.name}</h3>
+                            <p class="text-slate-500 text-xs line-clamp-2 leading-relaxed">${p.desc || p.description || 'Kakovostna ponudba domače vzreje.'}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex items-center justify-between border-t border-slate-100 mt-2">
+                        <span class="text-lg font-extrabold text-slate-900">${parseFloat(p.price || 0).toFixed(2)} €</span>
+                        <button onclick="addToCartDirect(${p.id})" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow">Dodaj</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openProductModal(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            currentModalProductId = id;
+            currentModalQty = 1;
+            document.getElementById('modal-qty').innerText = currentModalQty;
+            document.getElementById('modal-img').src = p.image || 'https://placehold.co/400x300/134e4a/ffffff?text=AkvarijskiSvet';
+            document.getElementById('modal-category').innerText = p.category || 'splošno';
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-desc').innerText = p.desc || p.description || 'Ni dodatnega opisa.';
+            document.getElementById('modal-price').innerText = parseFloat(p.price || 0).toFixed(2) + ' €';
+            
+            document.getElementById('modal-add-btn').onclick = function() {
+                addModalToCart();
+            };
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function changeModalQty(change) {
+            currentModalQty += change;
+            if (currentModalQty < 1) currentModalQty = 1;
+            document.getElementById('modal-qty').innerText = currentModalQty;
+        }
+
+        function addModalToCart() {
+            const p = products.find(x => x.id === currentModalProductId);
+            if (!p) return;
+            const item = cart.find(x => x.id === currentModalProductId);
+            if (item) {
+                item.qty += currentModalQty;
+            } else {
+                cart.push({ ...p, qty: currentModalQty });
+            }
+            saveCart();
+            closeProductModal();
+            toggleCartModal();
+        }
+
+        function addToCartDirect(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            const item = cart.find(x => x.id === id);
+            if (item) {
+                item.qty++;
+            } else {
+                cart.push({ ...p, qty: 1 });
+            }
+            saveCart();
+            toggleCartModal();
+        }
+
+        function updateCartQty(id, change) {
+            const item = cart.find(x => x.id === id);
+            if (!item) return;
+            item.qty += change;
+            if (item.qty <= 0) {
+                removeFromCart(id);
+            } else {
+                saveCart();
+                renderCartModal();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(x => x.id !== id);
+            saveCart();
+            renderCartModal();
+        }
+
+        function saveCart() {
+            localStorage.setItem('akvasvet_cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((a, b) => a + b.qty, 0);
+            document.getElementById('cart-count-badge').innerText = totalQty;
+        }
+
+        function toggleCartModal() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+            renderCartModal();
+        }
+
+        function renderCartModal() {
+            const container = document.getElementById('cart-items-container');
+            updateCartBadge();
+            
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-10">Košarica je prazna.</p>`;
+                document.getElementById('cart-total-price').innerText = "0.00 €";
+                return;
+            }
+            let total = 0;
+            container.innerHTML = cart.map(i => {
+                const sub = (i.price || 0) * i.qty;
+                total += sub;
+                return `
+                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div class="pr-2">
+                            <span class="font-semibold text-xs text-slate-800 block">${i.name}</span>
+                            <span class="text-[11px] text-slate-400">${parseFloat(i.price || 0).toFixed(2)} € / kos</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
+                                <button onclick="updateCartQty(${i.id}, -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">-</button>
+                                <span class="px-2 py-1 text-xs font-bold text-slate-800">${i.qty}</span>
+                                <button onclick="updateCartQty(${i.id}, 1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">+</button>
+                            </div>
+                            <span class="font-bold text-xs text-teal-700 w-16 text-right">${sub.toFixed(2)} €</span>
+                            <button onclick="removeFromCart(${i.id})" class="text-rose-400 hover:text-rose-600 px-1 text-xs"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
+        }
+
+        function submitOrder(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert("Vaša košarica je prazna!");
+                return;
+            }
+
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const notes = document.getElementById('cust-notes').value;
+
+            let total = 0;
+            let itemListText = cart.map(i => {
+                const sub = (i.price || 0) * i.qty;
+                total += sub;
+                return `- ${i.name} (${i.qty}x) = ${sub.toFixed(2)} €`;
+            }).join('\n');
+
+            const message = `Pozdravljeni!\n\nOddajam novo naročilo na AkvarijskiSvet:\n\nSEZNAM IZDELKOV:\n${itemListText}\n\nSkupaj za plačilo: ${total.toFixed(2)} €\n\nPODATKI STRANKE:\nIme in priimek: ${name}\nTelefon: ${phone}\nOpombe: ${notes || '/'}`;
+
+            const subject = encodeURIComponent(`Novo naročilo - AkvarijskiSvet (${name})`);
+            const mailtoUrl = `mailto:${MOJ_EMAIL}?subject=${subject}&body=${encodeURIComponent(message)}`;
+
+            window.location.href = mailtoUrl;
+
+            alert("Naročilo je pripravljeno! Odprl se bo vaš e-poštni program, kjer potrdite pošiljanje.");
+            cart = [];
+            saveCart();
+            toggleCartModal();
+        }
+    </script>
+</body>
+</html>
