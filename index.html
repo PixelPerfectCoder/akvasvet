@@ -21,7 +21,7 @@
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans pb-20 md:pb-0">
     <div class="bg-teal-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium">
         🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.
     </div>
@@ -31,14 +31,15 @@
             <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('vse')">
                 <div class="bg-teal-600 text-white p-3 rounded-2xl shadow-lg"><i class="fa-solid fa-fish-fins text-2xl"></i></div>
                 <div>
-                    <span class="text-2xl font-bold text-teal-700">AkvarijskiSvet</span>
-                    <span class="block text-xs text-slate-400 font-medium">HOBI AKVARISTIKA</span>
+                    <span class="text-xl sm:text-2xl font-bold text-teal-700 leading-tight">AkvarijskiSvet</span>
+                    <span class="block text-[10px] sm:text-xs text-slate-400 font-medium">HOBI AKVARISTIKA</span>
                 </div>
             </div>
-            <button onclick="toggleCartModal()" class="relative bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center space-x-2 shadow">
+            <!-- Gumb za košarico na RAČUNALNIKU (skrit na telefonih) -->
+            <button onclick="toggleCartModal()" class="hidden md:flex relative bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-semibold items-center space-x-2 shadow">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span>Košarica</span>
-                <span id="cart-count-badge" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full ml-1">0</span>
+                <span id="cart-count-badge-desktop" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full ml-1">0</span>
             </button>
         </div>
     </header>
@@ -51,6 +52,18 @@
     <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
         © 2026 AkvarijskiSvet - Vse pravice pridržane.
     </footer>
+
+    <!-- PLAVAJOČA SPODNJA VRSTICA ZA KOŠARICO NA TELEFONU (prikazana samo na manjših zaslonih) -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-3 z-40 md:hidden flex justify-between items-center px-5">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-cart-shopping text-teal-700 text-xl"></i>
+            <span class="font-bold text-sm text-slate-800">Skupaj: <span id="mobile-cart-total" class="text-teal-700">0.00 €</span></span>
+        </div>
+        <button onclick="toggleCartModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center space-x-2 shadow-md">
+            <span>Odpri košarico</span>
+            <span id="cart-count-badge-mobile" class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">0</span>
+        </button>
+    </div>
 
     <!-- MODAL: PODROBNOSTI IZDELKA -->
     <div id="product-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -291,7 +304,17 @@
 
         function updateCartBadge() {
             const totalQty = cart.reduce((a, b) => a + b.qty, 0);
-            document.getElementById('cart-count-badge').innerText = totalQty;
+            const totalPrice = cart.reduce((a, b) => a + ((b.price || 0) * b.qty), 0);
+
+            // Posodobi znački na računalniku in telefonu
+            const badgeDesktop = document.getElementById('cart-count-badge-desktop');
+            if (badgeDesktop) badgeDesktop.innerText = totalQty;
+            
+            const badgeMobile = document.getElementById('cart-count-badge-mobile');
+            if (badgeMobile) badgeMobile.innerText = totalQty;
+
+            const mobileTotal = document.getElementById('mobile-cart-total');
+            if (mobileTotal) mobileTotal.innerText = totalPrice.toFixed(2) + " €";
         }
 
         function toggleCartModal() {
