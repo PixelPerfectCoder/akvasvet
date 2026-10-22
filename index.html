@@ -53,7 +53,7 @@
         © 2026 AkvarijskiSvet - Vse pravice pridržane.
     </footer>
 
-    <!-- PLAVAJOČA SPODNJA VRSTICA ZA KOŠARICO NA TELEFONU (prikazana samo na manjših zaslonih) -->
+    <!-- PLAVAJOČA SPODNJA VRSTICA ZA KOŠARICO NA TELEFONU -->
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-3 z-40 md:hidden flex justify-between items-center px-5">
         <div class="flex items-center space-x-2">
             <i class="fa-solid fa-cart-shopping text-teal-700 text-xl"></i>
@@ -306,7 +306,6 @@
             const totalQty = cart.reduce((a, b) => a + b.qty, 0);
             const totalPrice = cart.reduce((a, b) => a + ((b.price || 0) * b.qty), 0);
 
-            // Posodobi znački na računalniku in telefonu
             const badgeDesktop = document.getElementById('cart-count-badge-desktop');
             if (badgeDesktop) badgeDesktop.innerText = totalQty;
             
