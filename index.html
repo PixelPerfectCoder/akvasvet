@@ -25,6 +25,7 @@
     <div class="bg-teal-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium">
         🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.
     </div>
+    
     <header class="bg-white shadow-md sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-20 items-center">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('vse')">
@@ -41,10 +42,12 @@
             </button>
         </div>
     </header>
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
         <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters"></div>
         <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
     </main>
+
     <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
         © 2026 AkvarijskiSvet - Vse pravice pridržane.
     </footer>
@@ -101,47 +104,4 @@
                         <input type="tel" id="cust-phone" required placeholder="npr. 040 123 456" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Opombe / Željen čas prevzema</label>
-                        <textarea id="cust-notes" rows="2" placeholder="Napišite morebitna vprašanja ali želje..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span>Pošlji naročilo preko E-pošte</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
-        const MOJ_EMAIL = "info@akvarijskisvet.si";
-
-        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-        let products = [];
-        let cart = JSON.parse(localStorage.getItem('akvasvet_cart')) || [];
-        let activeCategory = 'vse';
-        let currentModalProductId = null;
-        let currentModalQty = 1;
-
-        window.onload = function() {
-            updateCartBadge();
-            renderCategories();
-            fetchProductsFromSupabase();
-        };
-
-        async function fetchProductsFromSupabase() {
-            const container = document.getElementById('product-grid');
-            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Nalaganje iz baze...</div>`;
-            try {
-                const { data, error } = await supabaseClient.from('products').select('*');
-                if (error) throw error;
-                products = data || [];
-                renderProducts();
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500">Napaka pri povezavi z bazo.</div>`;
-            }
-        }
+                        <label
