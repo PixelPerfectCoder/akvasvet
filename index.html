@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AkvarijskiSvet - Akvarijske ribice, kozice in oprema</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
@@ -14,159 +18,678 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        aqua: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 900: '#134e4a' }
+                        aqua: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a'
+                        }
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans pb-20 md:pb-0">
-    <div class="bg-teal-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium">
-        🌿 Domača vzreja akvarijskih ribic in kozic! Osebni prevzem ali dogovor.
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans pb-24 md:pb-0">
+
+    <!-- TOP ANNOUNCEMENT BANNER -->
+    <div class="bg-teal-700 text-white text-xs md:text-sm py-2 px-4 text-center font-medium shadow-inner">
+        🌿 Domača vzreja akvarijskih ribic, kozic in rastlin! Osebni prevzem ali hitro pošiljanje po dogovoru.
     </div>
-    
+
+    <!-- MAIN HEADER -->
     <header class="bg-white shadow-md sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-20 items-center">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('vse')">
-                <div class="bg-teal-600 text-white p-3 rounded-2xl shadow-lg"><i class="fa-solid fa-fish-fins text-2xl"></i></div>
+            <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="filterCategory('vse')">
+                <div class="bg-gradient-to-tr from-teal-700 to-emerald-500 text-white p-3 rounded-2xl shadow-lg transform transition hover:scale-105">
+                    <i class="fa-solid fa-fish-fins text-2xl"></i>
+                </div>
                 <div>
-                    <span class="text-xl sm:text-2xl font-bold text-teal-700 leading-tight">AkvarijskiSvet</span>
-                    <span class="block text-[10px] sm:text-xs text-slate-400 font-medium">HOBI AKVARISTIKA</span>
+                    <span class="text-xl sm:text-2xl font-black text-teal-800 tracking-tight leading-none block">AkvarijskiSvet</span>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-semibold tracking-wider uppercase">Hobi Akvaristika & Vzreja</span>
                 </div>
             </div>
-            <button onclick="toggleCartModal()" class="hidden md:flex relative bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-semibold items-center space-x-2 shadow">
+
+            <!-- DESKTOP CART BUTTON -->
+            <button onclick="toggleCartModal()" class="hidden md:flex relative bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-5 py-2.5 rounded-xl font-semibold items-center space-x-2 shadow-md transition duration-150">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span>Košarica</span>
-                <span id="cart-count-badge-desktop" class="bg-amber-400 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full ml-1">0</span>
+                <span id="cart-count-badge-desktop" class="bg-amber-400 text-slate-900 text-xs font-black px-2.5 py-0.5 rounded-full ml-1">0</span>
             </button>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
-        <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters"></div>
-        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    <!-- NOTIFICATION TOAST CONTAINER -->
+    <div id="toast-container" class="fixed top-24 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        <!-- HERO / INFO BOX -->
+        <div class="bg-gradient-to-r from-teal-800 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white mb-8 shadow-xl relative overflow-hidden">
+            <div class="relative z-10 max-w-2xl">
+                <span class="inline-block bg-teal-900/50 text-teal-200 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wider border border-teal-500/30">Lokalna Akvaristika</span>
+                <h1 class="text-2xl sm:text-4xl font-extrabold mb-2">Zdravi akvarijski prebivalci za vaš domači biotop</h1>
+                <p class="text-teal-100 text-xs sm:text-sm leading-relaxed mb-4">Vsi naši organizmi so vzgojeni v optimalnih pogojih z vrhunsko oskrbo. Preglejte ponudbo ribic, kozic in opreme ter oddajte naročilo.</p>
+                <a href="#product-grid" class="inline-flex items-center space-x-2 bg-amber-400 hover:bg-amber-300 text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition shadow">
+                    <span>Razazi ponudbo</span>
+                    <i class="fa-solid fa-arrow-down"></i>
+                </a>
+            </div>
+            <i class="fa-solid fa-water absolute -right-6 -bottom-10 text-9xl text-white/10 pointer-events-none"></i>
+        </div>
+
+        <!-- CATEGORY FILTERS -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-8" id="category-filters">
+            <!-- Rendered dynamically -->
+        </div>
+
+        <!-- PRODUCTS GRID -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Rendered dynamically -->
+        </div>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
-        © 2026 AkvarijskiSvet - Vse pravice pridržane.
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 space-y-3">
+            <div class="flex justify-center items-center space-x-2 text-slate-200 font-bold text-sm">
+                <i class="fa-solid fa-fish-fins text-teal-400"></i>
+                <span>AkvarijskiSvet Slovenija</span>
+            </div>
+            <p class="text-slate-500">Kakovostna akvarijska oprema, ribice, kozice ter svetovanje za hobi akvarije.</p>
+            <p>© 2026 AkvarijskiSvet - Vse pravice pridržane.</p>
+        </div>
     </footer>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-3 z-40 md:hidden flex justify-between items-center px-5">
-        <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-cart-shopping text-teal-700 text-xl"></i>
-            <span class="font-bold text-sm text-slate-800">Skupaj: <span id="mobile-cart-total" class="text-teal-700">0.00 €</span></span>
+    <!-- MOBILE BOTTOM BAR -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl p-3 z-40 md:hidden flex justify-between items-center px-5">
+        <div class="flex items-center space-x-3">
+            <div class="relative">
+                <i class="fa-solid fa-cart-shopping text-teal-700 text-2xl"></i>
+                <span id="cart-count-badge-mobile" class="absolute -top-2 -right-2 bg-amber-400 text-slate-900 text-[10px] font-black px-1.5 py-0.2 rounded-full border border-white">0</span>
+            </div>
+            <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Skupni znesek</span>
+                <span id="mobile-cart-total" class="font-black text-base text-teal-800 leading-none">0.00 €</span>
+            </div>
         </div>
-        <button onclick="toggleCartModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center space-x-2 shadow-md">
+        <button onclick="toggleCartModal()" class="bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center space-x-2 shadow-md">
             <span>Odpri košarico</span>
-            <span id="cart-count-badge-mobile" class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">0</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
         </button>
     </div>
 
-    <!-- PRODUCT MODAL -->
-    <div id="product-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
-            <button onclick="closeProductModal()" class="absolute top-4 right-4 bg-slate-900/50 hover:bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 transition">&times;</button>
+    <!-- PRODUCT DETAIL MODAL -->
+    <div id="product-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col relative transform transition-all animate-in fade-in zoom-in duration-200">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 bg-slate-900/60 hover:bg-slate-900 text-white w-9 h-9 rounded-full flex items-center justify-center z-10 transition shadow-md">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
             <div class="h-64 bg-slate-100 overflow-hidden relative">
-                <img id="modal-img" src="" class="w-full h-full object-cover">
+                <img id="modal-img" src="" alt="Izdelek" class="w-full h-full object-cover">
                 <div id="modal-stock-badge" class="absolute top-4 left-4"></div>
             </div>
-            <div class="p-6 space-y-4">
-                <span id="modal-category" class="text-xs font-bold text-teal-600 uppercase tracking-wider"></span>
-                <h2 id="modal-title" class="text-xl font-bold text-slate-900"></h2>
-                <p id="modal-desc" class="text-slate-600 text-sm leading-relaxed"></p>
-                <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <span id="modal-price" class="text-2xl font-extrabold text-teal-700"></span>
+            <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
+                <div>
+                    <span id="modal-category" class="text-[11px] font-black text-teal-600 uppercase tracking-wider bg-teal-50 px-2.5 py-1 rounded-md"></span>
+                    <h2 id="modal-title" class="text-2xl font-bold text-slate-900 mt-2"></h2>
+                    <p id="modal-desc" class="text-slate-600 text-sm leading-relaxed mt-2 max-h-32 overflow-y-auto pr-1"></p>
+                </div>
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                    <div>
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Cena za kos</span>
+                        <span id="modal-price" class="text-2xl font-black text-teal-800"></span>
+                    </div>
                     <div class="flex items-center space-x-3">
-                        <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden bg-slate-50">
-                            <button onclick="changeModalQty(-1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 font-bold">-</button>
-                            <span id="modal-qty" class="px-3 py-2 text-sm font-bold text-slate-800">1</span>
-                            <button onclick="changeModalQty(1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 font-bold">+</button>
+                        <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                            <button onclick="changeModalQty(-1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 font-black">-</button>
+                            <span id="modal-qty" class="px-3 py-2 text-sm font-bold text-slate-800 w-8 text-center">1</span>
+                            <button onclick="changeModalQty(1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 font-black">+</button>
                         </div>
-                        <button id="modal-add-btn" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition shadow">Dodaj</button>
+                        <button id="modal-add-btn" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition shadow-md flex items-center space-x-2">
+                            <i class="fa-solid fa-cart-plus"></i>
+                            <span>Dodaj</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CART MODAL -->
-    <div id="cart-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end">
-        <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between overflow-hidden">
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-cart-shopping text-teal-400 text-lg"></i>
-                    <h3 class="font-bold text-lg">Vaša Košarica</h3>
+    <!-- SHOPPING CART SLIDE-OVER MODAL -->
+    <div id="cart-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between overflow-hidden relative transition-transform duration-300">
+            <!-- Cart Header -->
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-cart-shopping text-teal-400 text-xl"></i>
+                    <div>
+                        <h3 class="font-bold text-base leading-none">Vaša Košarica</h3>
+                        <span class="text-[11px] text-slate-400">Pregled izbranih artiklov</span>
+                    </div>
                 </div>
-                <button onclick="toggleCartModal()" class="text-xl hover:text-teal-400">&times;</button>
+                <button onclick="toggleCartModal()" class="text-slate-400 hover:text-white text-xl transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <div class="p-5 flex-grow overflow-y-auto space-y-4" id="cart-items-container"></div>
-            <div class="p-5 bg-slate-50 border-t space-y-4">
-                <div class="flex justify-between items-center text-lg font-bold">
-                    <span>Skupaj za plačilo:</span>
-                    <span id="cart-total-price" class="text-teal-700 text-xl font-extrabold">0.00 €</span>
+
+            <!-- Cart Items List -->
+            <div class="p-5 flex-grow overflow-y-auto space-y-3" id="cart-items-container">
+                <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Cart Footer & Order Form -->
+            <div class="p-5 bg-slate-50 border-t border-slate-200 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div class="flex justify-between items-center text-slate-800 pb-2 border-b border-slate-200">
+                    <span class="font-semibold text-sm">Skupaj za plačilo:</span>
+                    <span id="cart-total-price" class="text-teal-800 text-xl font-black">0.00 €</span>
                 </div>
+
                 <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Ime in Priimek *</label>
-                        <input type="text" id="cust-name" required placeholder="npr. Janez Novak" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Ime in Priimek *</label>
+                        <input type="text" id="cust-name" required placeholder="npr. Marko Novak" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">E-poštni naslov *</label>
-                        <input type="email" id="cust-email" required placeholder="npr. janez@gmail.com" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">E-poštni naslov *</label>
+                        <input type="email" id="cust-email" required placeholder="npr. marko@example.com" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Telefonska številka *</label>
-                        <input type="tel" id="cust-phone" required placeholder="npr. 040 123 456" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Telefonska številka *</label>
+                        <input type="tel" id="cust-phone" required placeholder="npr. 040 123 456" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Opombe / Željen čas prevzema</label>
-                        <textarea id="cust-notes" rows="2" placeholder="Napišite morebitna vprašanja ali želje..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Opombe / Naslov / Željen čas prevzema</label>
+                        <textarea id="cust-notes" rows="2" placeholder="Vnesite morebitne opombe glede prevzema ali dostave..." class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none transition"></textarea>
                     </div>
-                    <button type="submit" id="submit-btn" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-2">
+
+                    <button type="submit" id="submit-btn" class="w-full bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-2 disabled:opacity-50">
                         <i class="fa-solid fa-paper-plane"></i>
-                        <span>Oddaj naročilo</span>
+                        <span id="submit-btn-text">Oddaj naročilo</span>
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
     <script>
+        // --- CONSTANTS & CONFIGURATION ---
         const SUPABASE_URL = "https://wagfezozagdbktyzljcz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_hZhjiJvCWpgsdBUpUXQzlA_V1R_OO1S";
         const WEB3FORMS_KEY = "59254fb0-9372-4565-a64b-a51ed72ed00e";
+        const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=600&auto=format&fit=crop&q=80";
 
-        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        // Initialize Supabase Client safely
+        let supabaseClient = null;
+        try {
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.warn("Supabase init error:", e);
+        }
 
+        // Fallback default products if Supabase fails or is empty
         const defaultProducts = [
-            { id: 1, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, instock: true, desc: "Zdrave in živahne akvarijske ribice iz domače vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
-            { id: 2, name: "Neonske ribice (Paracheirodon innesi)", category: "ribice", price: 1.20, instock: false, desc: "Priljubljena jata svetlečih akvarijskih ribic.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
-            { id: 3, name: "Red Cherry Kozice", category: "kozice", price: 1.00, instock: true, desc: "Rdeče akvarijske kozice, odlične za čiščenje alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
-            { id: 4, name: "Java Mah (Taxiphyllum barbieri)", category: "rastline", price: 3.50, instock: true, desc: "Preprosta in nezahtevna akvarijska rastlina za kozice.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" }
+            { id: 101, name: "Gupiji (Mix barv)", category: "ribice", price: 1.50, instock: true, desc: "Zdrave in živahne akvarijske ribice iz domače akvarijske vzreje.", image: "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500" },
+            { id: 102, name: "Neonske ribice", category: "ribice", price: 1.20, instock: false, desc: "Priljubljena jata svetlečih akvarijskih ribic za mirne akvarije.", image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500" },
+            { id: 103, name: "Red Cherry Kozice", category: "kozice", price: 1.00, instock: true, desc: "Rdeče akvarijske kozice, odlične za čiščenje nezaželenih alg.", image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=500" },
+            { id: 104, name: "Java Mah (Taxiphyllum)", category: "rastline", price: 3.50, instock: true, desc: "Preprosta in nezahtevna akvarijska rastlina, idealna za zaklon kozic.", image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=500" },
+            { id: 105, name: "Anubias Nana", category: "rastline", price: 4.80, instock: true, desc: "Robustna rastlina s temno zelenimi listi, primerna za pritrjevanje na korenine ali korenike.", image: "https://images.unsplash.com/photo-1508873696983-2df515122519?w=500" },
+            { id: 106, name: "Astatotilapia burtoni", category: "ribice", price: 3.00, instock: true, desc: "Afriški ciklid z izjemnimi barvnimi vzorci in zanimivim vedenjem.", image: "https://images.unsplash.com/photo-1520301251435-71286c076595?w=500" }
         ];
 
+        // Global State
         let products = [];
         let cart = JSON.parse(localStorage.getItem('akvasvet_cart')) || [];
         let activeCategory = 'vse';
         let currentModalProductId = null;
         let currentModalQty = 1;
 
+        // --- LIFECYCLE HOOKS ---
         window.onload = function() {
             updateCartBadge();
             renderCategories();
             fetchProductsFromSupabase();
         };
 
+        // Helper to format currency
+        function formatPrice(val) {
+            const num = parseFloat(val) || 0;
+            return num.toFixed(2) + ' €';
+        }
+
+        // --- DATA FETCHING & PARSING ---
         async function fetchProductsFromSupabase() {
             const container = document.getElementById('product-grid');
-            container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Nalaganje iz baze...</div>`;
+            container.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 space-y-3">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl text-teal-600"></i>
+                    <p class="text-xs font-semibold">Nalaganje ponudbe iz baze...</p>
+                </div>
+            `;
+
             try {
-                if (!supabaseClient) throw new Error("Supabase ni povezan");
+                if (!supabaseClient) throw new Error("Supabase client not initialized");
+
                 const { data, error } = await supabaseClient.from('products').select('*');
                 if (error) throw error;
-                
+
                 if (data && data.length > 0) {
                     products = data.map(p => {
-                        let isStockAvailable = true;
-                        if (p.instinstock
+                        // 1. Stock Fallback logic
+                        let stockVal = true;
+                        if (p.instock !== undefined && p.instock !== null) stockVal = p.instock;
+                        else if (p.in_stock !== undefined && p.in_stock !== null) stockVal = p.in_stock;
+                        else if (p.instinstock !== undefined && p.instinstock !== null) stockVal = p.instinstock;
+                        else if (p.zaloga !== undefined && p.zaloga !== null) stockVal = p.zaloga;
+                        else if (p.stock !== undefined && p.stock !== null) stockVal = p.stock;
+
+                        // Normalize boolean or text stock
+                        if (typeof stockVal === 'string') {
+                            stockVal = stockVal.toLowerCase() === 'true' || stockVal === '1' || stockVal.toLowerCase() === 'da';
+                        } else {
+                            stockVal = Boolean(stockVal);
+                        }
+
+                        // 2. Image Fallback logic
+                        let imgVal = p.image || p.image_url || p.img || p.slika || FALLBACK_IMAGE;
+
+                        // 3. Category Fallback logic
+                        let catVal = (p.category || p.kategorija || 'ostalo').toLowerCase().trim();
+
+                        return {
+                            id: p.id,
+                            name: p.name || p.naziv || p.title || 'Neimenovan izdelek',
+                            category: catVal,
+                            price: parseFloat(p.price || p.cena || 0),
+                            instock: stockVal,
+                            desc: p.desc || p.description || p.opis || 'Za ta izdelek ni dodatnega opisa.',
+                            image: imgVal
+                        };
+                    });
+                } else {
+                    products = defaultProducts;
+                }
+            } catch (err) {
+                console.warn("Uporaba privzetih podatkov zaradi napake Supabase:", err);
+                products = defaultProducts;
+            }
+
+            renderCategories();
+            renderProducts();
+        }
+
+        // --- CATEGORIES LOGIC ---
+        function renderCategories() {
+            const container = document.getElementById('category-filters');
+            if (!container) return;
+
+            // Extract unique categories
+            const rawCategories = Array.from(new Set(products.map(p => p.category)));
+            const allCats = ['vse', ...rawCategories];
+
+            container.innerHTML = allCats.map(cat => {
+                const isActive = activeCategory === cat;
+                const label = cat === 'vse' ? 'Vsi izdelki' : cat.charAt(0).toUpperCase() + cat.slice(1);
+                
+                return `
+                    <button onclick="filterCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm border ${
+                        isActive 
+                            ? 'bg-teal-700 text-white border-teal-700 shadow-md scale-105' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }">
+                        ${label}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function filterCategory(cat) {
+            activeCategory = cat;
+            renderCategories();
+            renderProducts();
+        }
+
+        // --- RENDER PRODUCTS GRID ---
+        function renderProducts() {
+            const container = document.getElementById('product-grid');
+            if (!container) return;
+
+            const filtered = activeCategory === 'vse' 
+                ? products 
+                : products.filter(p => p.category === activeCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+                        <i class="fa-solid fa-box-open text-4xl mb-2 text-slate-300"></i>
+                        <p class="font-bold text-sm">Ni najdenih izdelkov v tej kategoriji.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => {
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group">
+                        <!-- Image & Badge -->
+                        <div class="h-48 bg-slate-100 overflow-hidden relative cursor-pointer" onclick="openProductModal(${p.id})">
+                            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}';">
+                            <div class="absolute top-3 left-3">
+                                ${
+                                    p.instock 
+                                        ? '<span class="bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fa-solid fa-check mr-1"></i> Na zalogi</span>'
+                                        : '<span class="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fa-solid fa-xmark mr-1"></i> Ni na zalogi</span>'
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="p-5 flex flex-col flex-grow justify-between space-y-3">
+                            <div>
+                                <span class="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">${p.category}</span>
+                                <h3 class="font-bold text-slate-800 text-base leading-snug line-clamp-1 group-hover:text-teal-700 transition cursor-pointer" onclick="openProductModal(${p.id})">${p.name}</h3>
+                                <p class="text-slate-500 text-xs line-clamp-2 mt-1 leading-relaxed">${p.desc}</p>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <div>
+                                    <span class="block text-[9px] text-slate-400 font-bold uppercase">Cena</span>
+                                    <span class="text-lg font-black text-slate-900">${formatPrice(p.price)}</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <button onclick="openProductModal(${p.id})" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition" title="Podrobnosti">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button 
+                                        onclick="addToCart(${p.id})" 
+                                        ${!p.instock ? 'disabled' : ''} 
+                                        class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition shadow-sm ${
+                                            p.instock 
+                                                ? 'bg-teal-600 hover:bg-teal-700 text-white active:scale-95' 
+                                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                        }">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                        <span>Dodaj</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- PRODUCT MODAL LOGIC ---
+        function openProductModal(id) {
+            const product = products.find(p => p.id == id);
+            if (!product) return;
+
+            currentModalProductId = product.id;
+            currentModalQty = 1;
+
+            document.getElementById('modal-img').src = product.image;
+            document.getElementById('modal-title').textContent = product.name;
+            document.getElementById('modal-category').textContent = product.category;
+            document.getElementById('modal-desc').textContent = product.desc;
+            document.getElementById('modal-price').textContent = formatPrice(product.price);
+            document.getElementById('modal-qty').textContent = currentModalQty;
+
+            const badgeContainer = document.getElementById('modal-stock-badge');
+            badgeContainer.innerHTML = product.instock 
+                ? '<span class="bg-emerald-500/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-check mr-1"></i> Na zalogi</span>'
+                : '<span class="bg-rose-500/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-xmark mr-1"></i> Ni na zalogi</span>';
+
+            const addBtn = document.getElementById('modal-add-btn');
+            if (product.instock) {
+                addBtn.disabled = false;
+                addBtn.className = "bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition shadow-md flex items-center space-x-2";
+                addBtn.onclick = function() {
+                    addToCart(product.id, currentModalQty);
+                    closeProductModal();
+                };
+            } else {
+                addBtn.disabled = true;
+                addBtn.className = "bg-slate-200 text-slate-400 px-5 py-2.5 rounded-xl text-sm font-bold cursor-not-allowed flex items-center space-x-2";
+                addBtn.onclick = null;
+            }
+
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function changeModalQty(delta) {
+            currentModalQty += delta;
+            if (currentModalQty < 1) currentModalQty = 1;
+            document.getElementById('modal-qty').textContent = currentModalQty;
+        }
+
+        // --- SHOPPING CART LOGIC ---
+        function addToCart(productId, qty = 1) {
+            const product = products.find(p => p.id == productId);
+            if (!product || !product.instock) return;
+
+            const existingIndex = cart.findIndex(item => item.id == productId);
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += qty;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    qty: qty
+                });
+            }
+
+            saveCart();
+            showToast(`Dodano v košarico: ${product.name}`);
+        }
+
+        function changeCartQty(productId, delta) {
+            const index = cart.findIndex(item => item.id == productId);
+            if (index > -1) {
+                cart[index].qty += delta;
+                if (cart[index].qty <= 0) {
+                    cart.splice(index, 1);
+                }
+                saveCart();
+            }
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id != productId);
+            saveCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('akvasvet_cart', JSON.stringify(cart));
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function updateCartBadge() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            document.getElementById('cart-count-badge-desktop').textContent = totalCount;
+            document.getElementById('cart-count-badge-mobile').textContent = totalCount;
+            document.getElementById('mobile-cart-total').textContent = formatPrice(totalPrice);
+            document.getElementById('cart-total-price').textContent = formatPrice(totalPrice);
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            if (!container) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-slate-400">
+                        <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-slate-300"></i>
+                        <p class="font-bold text-sm">Vaša košarica je prazna.</p>
+                        <p class="text-xs text-slate-400 mt-1">Izberite izdelke iz naše ponudbe.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cart.map(item => {
+                return `
+                    <div class="flex items-center space-x-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-xl border border-slate-200 flex-shrink-0" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}';">
+                        <div class="flex-grow min-w-0">
+                            <h4 class="font-bold text-slate-800 text-xs truncate">${item.name}</h4>
+                            <span class="text-xs text-teal-700 font-extrabold block mt-0.5">${formatPrice(item.price)}</span>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
+                                    <button onclick="changeCartQty(${item.id}, -1)" class="px-2 py-0.5 text-slate-600 hover:bg-slate-100 font-black text-xs">-</button>
+                                    <span class="px-2 py-0.5 text-xs font-bold text-slate-800">${item.qty}</span>
+                                    <button onclick="changeCartQty(${item.id}, 1)" class="px-2 py-0.5 text-slate-600 hover:bg-slate-100 font-black text-xs">+</button>
+                                </div>
+                                <button onclick="removeFromCart(${item.id})" class="text-xs text-rose-500 hover:text-rose-700 p-1">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="text-xs font-black text-slate-800">${formatPrice(item.price * item.qty)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleCartModal() {
+            const modal = document.getElementById('cart-modal');
+            if (modal.classList.contains('hidden')) {
+                renderCartItems();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // --- SUBMIT ORDER LOGIC ---
+        async function submitOrder(e) {
+            e.preventDefault();
+
+            if (cart.length === 0) {
+                showToast("Vaša košarica je prazna!", "error");
+                return;
+            }
+
+            const name = document.getElementById('cust-name').value.trim();
+            const email = document.getElementById('cust-email').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const notes = document.getElementById('cust-notes').value.trim();
+
+            if (!name || !email || !phone) {
+                showToast("Prosimo, izpolnite vsa obvezna polja.", "error");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            const submitBtnText = document.getElementById('submit-btn-text');
+            submitBtn.disabled = true;
+            submitBtnText.textContent = "Pošiljanje...";
+
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const cartItemsSummary = cart.map(i => `${i.name} (x${i.qty}) - ${formatPrice(i.price * i.qty)}`).join('\n');
+
+            // 1. Send via Web3Forms API
+            let web3Success = false;
+            try {
+                const formData = new FormData();
+                formData.append("access_key", WEB3FORMS_KEY);
+                formData.append("subject", `Naročilo AkvarijskiSvet - ${name}`);
+                formData.append("from_name", "AkvarijskiSvet Trgovina");
+                formData.append("name", name);
+                formData.append("email", email);
+                formData.append("phone", phone);
+                formData.append("message", `NAROČNIK:\nIme: ${name}\nE-pošta: ${email}\nTelefon: ${phone}\nOpombe: ${notes}\n\nNAROČENI ARTIKLI:\n${cartItemsSummary}\n\nSKUPAJ ZA PLAČILO: ${formatPrice(totalPrice)}`);
+
+                const res = await fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    body: formData
+                });
+                const resJson = await res.json();
+                if (resJson.success) web3Success = true;
+            } catch (err) {
+                console.warn("Web3Forms napaka pri pošiljanju:", err);
+            }
+
+            // 2. Insert into Supabase 'orders' table
+            let supabaseSuccess = false;
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient.from('orders').insert([
+                        {
+                            customer_name: name,
+                            customer_email: email,
+                            customer_phone: phone,
+                            notes: notes,
+                            items: cart,
+                            total_price: totalPrice,
+                            status: 'novo'
+                        }
+                    ]);
+                    if (!error) supabaseSuccess = true;
+                    else console.warn("Supabase vnos naročila error:", error);
+                } catch (err) {
+                    console.warn("Supabase vnos naročila napaka:", err);
+                }
+            }
+
+            // Handle completion result
+            submitBtn.disabled = false;
+            submitBtnText.textContent = "Oddaj naročilo";
+
+            if (web3Success || supabaseSuccess) {
+                showToast("Naročilo je bilo uspešno oddano! Hvala.", "success");
+                cart = [];
+                saveCart();
+                document.getElementById('order-form').reset();
+                toggleCartModal();
+            } else {
+                showToast("Prišlo je do napake pri pošiljanju. Prosimo, poskusite ponovno.", "error");
+            }
+        }
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgColor = type === "error" ? "bg-rose-600" : type === "success" ? "bg-emerald-600" : "bg-teal-700";
+            
+            toast.className = `${bgColor} text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 transform transition-all duration-300 pointer-events-auto opacity-0 translate-y-2`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+
+            // Animate out
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
