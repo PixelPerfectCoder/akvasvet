@@ -353,13 +353,17 @@
 
             try {
                 if (supabaseClient) {
-                    await supabaseClient
+                    const { error } = await supabaseClient
                         .from('products')
                         .update({ views: product.views })
                         .eq('id', productId);
+                    
+                    if (error) {
+                        console.error("Supabase napaka pri posodabljanju ogledov:", error.message);
+                    }
                 }
             } catch (err) {
-                console.warn("Napaka pri posodabljanju ogledov:", err);
+                console.warn("Napaka pri povezavi s Supabase za oglede:", err);
             }
         }
 
@@ -405,13 +409,12 @@
                     .sort((a, b) => (b.views || 0) - (a.views || 0));
             }
 
-            // TOP 2 z zalogo > 0 v vsaki kategoriji dobi značko Priljubljeno
             const popularIds = new Set();
             const categories = ['ribice', 'kozice', 'rastline', 'hrana', 'oprema'];
 
             categories.forEach(cat => {
                 const topInCat = products
-                    .filter(p => p.category === cat && p.quantity > 0 && (p.views || 0) > 0)
+                    .filter(p => p.category === cat && (p.views || 0) > 0)
                     .sort((a, b) => (b.views || 0) - (a.views || 0))
                     .slice(0, 2);
 
